@@ -52,3 +52,23 @@ export const dashboardMetricsSchema = z.object({
   equityCurve: z.array(equityCurvePointSchema),
 });
 export type DashboardMetrics = z.infer<typeof dashboardMetricsSchema>;
+
+export const calendarQuerySchema = z.object({
+  year: z.coerce.number().int().min(2000).max(2100),
+  month: z.coerce.number().int().min(1).max(12),
+});
+export type CalendarQuery = z.infer<typeof calendarQuerySchema>;
+
+export const tradingDaySummarySchema = z.object({
+  date: z.string(),
+  netPnl: z.number(),
+  tradeCount: z.number(),
+});
+export type TradingDaySummary = z.infer<typeof tradingDaySummarySchema>;
+
+export const calendarSummarySchema = z.object({
+  days: z.array(tradingDaySummarySchema),
+  monthlyNetPnl: z.number(),
+  monthlyTradeCount: z.number(),
+});
+export type CalendarSummary = z.infer<typeof calendarSummarySchema>;

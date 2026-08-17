@@ -1,14 +1,22 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import type { TradeListQuery, UpdateTradeInput } from "@rs-flow/shared";
-import { tradesApi } from "./api";
+import type { CreateAttachmentInput, TradeListQuery, UpdateTradeInput } from "@rs-flow/shared";
+import { tradeAttachmentsApi, tradesApi } from "./api";
 
 export const TRADES_QUERY_KEY = ["trades"] as const;
 
-export function useTrades(query: Partial<TradeListQuery>) {
+export function useTrades(query: Partial<TradeListQuery>, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...TRADES_QUERY_KEY, query],
     queryFn: () => tradesApi.list(query),
     placeholderData: keepPreviousData,
+    enabled: options?.enabled ?? true,
+  });
+}
+
+export function useTrade(id: string) {
+  return useQuery({
+    queryKey: [...TRADES_QUERY_KEY, "detail", id],
+    queryFn: () => tradesApi.getById(id),
   });
 }
 
@@ -33,5 +41,21 @@ export function useDeleteTrade() {
   return useMutation({
     mutationFn: tradesApi.remove,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: TRADES_QUERY_KEY }),
+  });
+}
+
+export function useAddAttachment(tradeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateAttachmentInput) => tradeAttachmentsApi.create(tradeId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...TRADES_QUERY_KEY, "detail", tradeId] }),
+  });
+}
+
+export function useDeleteAttachment(tradeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (attachmentId: string) => tradeAttachmentsApi.remove(tradeId, attachmentId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...TRADES_QUERY_KEY, "detail", tradeId] }),
   });
 }

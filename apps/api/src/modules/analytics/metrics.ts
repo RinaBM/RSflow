@@ -87,6 +87,31 @@ export function groupNetPnlByTradingDay(chronologicalTrades: ClosedTrade[]): Map
   return byDay;
 }
 
+export interface TradingDaySummary {
+  date: string;
+  netPnl: number;
+  tradeCount: number;
+}
+
+/** Per-day P&L and trade count for closed trades, sorted chronologically. Used by the calendar view. */
+export function summarizeTradingDays(trades: AnalyticsTrade[]): TradingDaySummary[] {
+  const closed = trades.filter(isClosed);
+  const byDay = new Map<string, TradingDaySummary>();
+
+  for (const trade of closed) {
+    const date = dayKey(trade.exitTime);
+    const existing = byDay.get(date);
+    if (existing) {
+      existing.netPnl += trade.netPnl;
+      existing.tradeCount += 1;
+    } else {
+      byDay.set(date, { date, netPnl: trade.netPnl, tradeCount: 1 });
+    }
+  }
+
+  return [...byDay.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
 function findExtremeDay(
   byDay: Map<string, number>,
   compare: (a: number, b: number) => boolean,

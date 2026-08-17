@@ -9,6 +9,7 @@ import {
   calculateWinRate,
   computeDashboardMetrics,
   groupNetPnlByTradingDay,
+  summarizeTradingDays,
   type AnalyticsTrade,
 } from "./metrics.js";
 
@@ -99,6 +100,28 @@ describe("groupNetPnlByTradingDay", () => {
     const byDay = groupNetPnlByTradingDay(trades);
     expect(byDay.get("2026-01-01")).toBe(80);
     expect(byDay.get("2026-01-02")).toBe(-20);
+  });
+});
+
+describe("summarizeTradingDays", () => {
+  it("aggregates net P&L and trade count per day, sorted chronologically, ignoring open trades", () => {
+    const trades: AnalyticsTrade[] = [
+      trade({ id: "1", netPnl: 50, exitTime: new Date("2026-01-02T15:00:00Z") }),
+      trade({ id: "2", netPnl: 30, exitTime: new Date("2026-01-01T18:00:00Z") }),
+      trade({ id: "3", netPnl: -20, exitTime: new Date("2026-01-01T15:00:00Z") }),
+      trade({ id: "4", status: "OPEN", exitTime: null, netPnl: null }),
+    ];
+
+    const summary = summarizeTradingDays(trades);
+
+    expect(summary).toEqual([
+      { date: "2026-01-01", netPnl: 10, tradeCount: 2 },
+      { date: "2026-01-02", netPnl: 50, tradeCount: 1 },
+    ]);
+  });
+
+  it("returns an empty array when there are no closed trades", () => {
+    expect(summarizeTradingDays([])).toEqual([]);
   });
 });
 

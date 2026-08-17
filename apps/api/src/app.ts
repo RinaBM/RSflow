@@ -9,6 +9,10 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { tradingAccountRouter } from "./modules/trading-accounts/trading-account.routes.js";
 import { tradeRouter } from "./modules/trades/trade.routes.js";
 import { analyticsRouter } from "./modules/analytics/analytics.routes.js";
+import { strategyRouter } from "./modules/strategies/strategy.routes.js";
+import { setupRouter } from "./modules/setups/setup.routes.js";
+import { tagRouter } from "./modules/tags/tag.routes.js";
+import { mistakeCategoryRouter } from "./modules/mistake-categories/mistake-category.routes.js";
 
 export function createApp() {
   const app = express();
@@ -24,6 +28,10 @@ export function createApp() {
   app.use("/api/trading-accounts", tradingAccountRouter);
   app.use("/api/trades", tradeRouter);
   app.use("/api/analytics", analyticsRouter);
+  app.use("/api/strategies", strategyRouter);
+  app.use("/api/setups", setupRouter);
+  app.use("/api/tags", tagRouter);
+  app.use("/api/mistake-categories", mistakeCategoryRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

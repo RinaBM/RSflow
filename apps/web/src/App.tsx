@@ -7,6 +7,7 @@ import { LoginPage } from "@/pages/login-page";
 import { RegisterPage } from "@/pages/register-page";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { JournalPage } from "@/pages/journal-page";
+import { TradeReviewPage } from "@/pages/trade-review-page";
 import { CalendarPage } from "@/pages/calendar-page";
 import { AnalyticsPage } from "@/pages/analytics-page";
 import { StrategiesPage } from "@/pages/strategies-page";
@@ -27,6 +28,7 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="/journal" element={<JournalPage />} />
+              <Route path="/journal/:id" element={<TradeReviewPage />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/strategies" element={<StrategiesPage />} />

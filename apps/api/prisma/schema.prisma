@@ -96,8 +96,11 @@ model Trade {
   status          TradeStatus   @default(CLOSED)
   strategyId      String?
   setupId         String?
+  entryReason     String?
   notes           String?
   mistakesNotes   String?
+  whatWentWell    String?
+  lessonsLearned  String?
   tradingPlan     String?
   followedPlan    Boolean?
   emotionalState  String?

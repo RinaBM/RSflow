@@ -1,10 +1,15 @@
 import type { Request, Response } from "express";
 import type { TradeListQuery } from "@rs-flow/shared";
-import { createTrade, deleteTrade, listTrades, updateTrade } from "./trade.service.js";
+import { createTrade, deleteTrade, getTradeById, listTrades, updateTrade } from "./trade.service.js";
 
 export async function list(req: Request, res: Response) {
   const result = await listTrades(req.userId as string, req.query as unknown as TradeListQuery);
   res.status(200).json(result);
+}
+
+export async function getOne(req: Request, res: Response) {
+  const trade = await getTradeById(req.userId as string, req.params.id as string);
+  res.status(200).json({ trade });
 }
 
 export async function create(req: Request, res: Response) {

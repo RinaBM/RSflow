@@ -6,7 +6,8 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, NotebookText, Pencil, Plus, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Trade } from "@rs-flow/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,7 +84,15 @@ export function JournalPage() {
 
   const columns = useMemo<ColumnDef<Trade>[]>(
     () => [
-      { accessorKey: "symbol", header: "Symbol" },
+      {
+        accessorKey: "symbol",
+        header: "Symbol",
+        cell: ({ row }) => (
+          <Link to={`/journal/${row.original.id}`} className="font-medium hover:underline">
+            {row.original.symbol}
+          </Link>
+        ),
+      },
       {
         accessorKey: "side",
         header: "Side",
@@ -140,6 +149,11 @@ export function JournalPage() {
         enableSorting: false,
         cell: ({ row }) => (
           <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="icon" asChild>
+              <Link to={`/journal/${row.original.id}`} title="Review">
+                <NotebookText className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => openEditDialog(row.original)}>
               <Pencil className="h-3.5 w-3.5" />
             </Button>

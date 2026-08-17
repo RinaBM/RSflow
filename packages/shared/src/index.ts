@@ -4,3 +4,4 @@ export * from "./schemas/common.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/trading-account.js";
 export * from "./schemas/trade.js";
+export * from "./schemas/analytics.js";

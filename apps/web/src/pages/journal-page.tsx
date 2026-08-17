@@ -88,12 +88,7 @@ export function JournalPage() {
         accessorKey: "side",
         header: "Side",
         cell: ({ row }) => (
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-xs font-medium",
-              row.original.side === "LONG" ? "bg-profit/15 text-profit" : "bg-loss/15 text-loss",
-            )}
-          >
+          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
             {row.original.side}
           </span>
         ),

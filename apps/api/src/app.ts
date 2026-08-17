@@ -7,6 +7,7 @@ import { errorHandler, notFoundHandler } from "./common/error-handler.js";
 import { logger } from "./common/logger.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { tradingAccountRouter } from "./modules/trading-accounts/trading-account.routes.js";
+import { tradeRouter } from "./modules/trades/trade.routes.js";
 
 export function createApp() {
   const app = express();
@@ -20,6 +21,7 @@ export function createApp() {
 
   app.use("/api/auth", authRouter);
   app.use("/api/trading-accounts", tradingAccountRouter);
+  app.use("/api/trades", tradeRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

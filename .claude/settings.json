@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add *)",
+      "Bash(pnpm install *)",
+      "Bash(cp .env.example .env)",
+      "Bash(pnpm prisma:generate)",
+      "Bash(pnpm typecheck *)"
+    ]
+  }
+}

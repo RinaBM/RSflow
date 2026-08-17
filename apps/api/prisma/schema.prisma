@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum TradeSide {
+  LONG
+  SHORT
+}
+
+enum TradeStatus {
+  OPEN
+  CLOSED
+}
+
+enum TradeSource {
+  MANUAL
+  CSV
+  BROKER
+}
+
+enum ExecutionType {
+  ENTRY
+  EXIT
+}
+
+enum AttachmentType {
+  BEFORE
+  AFTER
+}
+
+enum ImportStatus {
+  PENDING
+  DONE
+  FAILED
+}
+
+// ---------- Core ----------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tradingAccounts  TradingAccount[]
+  trades           Trade[]
+  strategies       Strategy[]
+  setups           Setup[]
+  tags             Tag[]
+  mistakeCategories MistakeCategory[]
+  importBatches    ImportBatch[]
+}
+
+model TradingAccount {
+  id               String   @id @default(cuid())
+  userId           String
+  name             String
+  broker           String
+  currency         String   @default("USD")
+  startingBalance  Decimal  @default(0) @db.Decimal(18, 2)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades        Trade[]
+  importBatches ImportBatch[]
+
+  @@index([userId])
+}
+
+model Trade {
+  id              String        @id @default(cuid())
+  userId          String
+  tradingAccountId String
+  symbol          String
+  side            TradeSide
+  entryTime       DateTime
+  exitTime        DateTime?
+  entryPrice      Decimal       @db.Decimal(18, 6)
+  exitPrice       Decimal?      @db.Decimal(18, 6)
+  quantity        Decimal       @db.Decimal(18, 6)
+  fees            Decimal       @default(0) @db.Decimal(18, 6)
+  grossPnl        Decimal?      @db.Decimal(18, 6)
+  netPnl          Decimal?      @db.Decimal(18, 6)
+  returnPct       Decimal?      @db.Decimal(9, 4)
+  status          TradeStatus   @default(CLOSED)
+  strategyId      String?
+  setupId         String?
+  notes           String?
+  mistakesNotes   String?
+  tradingPlan     String?
+  followedPlan    Boolean?
+  emotionalState  String?
+  source          TradeSource   @default(MANUAL)
+  importBatchId   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tradingAccount TradingAccount  @relation(fields: [tradingAccountId], references: [id], onDelete: Cascade)
+  strategy       Strategy?       @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  setup          Setup?          @relation(fields: [setupId], references: [id], onDelete: SetNull)
+  importBatch    ImportBatch?    @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+
+  executions  TradeExecution[]
+  attachments TradeAttachment[]
+  tags        TradeTag[]
+  mistakes    TradeMistake[]
+
+  @@index([userId])
+  @@index([tradingAccountId])
+  @@index([userId, entryTime])
+  @@index([symbol])
+}
+
+// Future-proofing for multi-fill trades. Populated only when granular fill
+// data is available (e.g. some broker imports); MVP UI reads Trade's own
+// aggregate entry/exit fields and ignores this table.
+model TradeExecution {
+  id        String        @id @default(cuid())
+  tradeId   String
+  type      ExecutionType
+  price     Decimal       @db.Decimal(18, 6)
+  quantity  Decimal       @db.Decimal(18, 6)
+  timestamp DateTime
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId])
+}
+
+// ---------- User-defined taxonomies ----------
+
+model Strategy {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[]
+
+  @@unique([userId, name])
+}
+
+model Setup {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[]
+
+  @@unique([userId, name])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String?
+  createdAt DateTime @default(now())
+
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades TradeTag[]
+
+  @@unique([userId, name])
+}
+
+model MistakeCategory {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades TradeMistake[]
+
+  @@unique([userId, name])
+}
+
+model TradeTag {
+  tradeId String
+  tagId   String
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([tradeId, tagId])
+}
+
+model TradeMistake {
+  tradeId           String
+  mistakeCategoryId String
+
+  trade           Trade           @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  mistakeCategory MistakeCategory @relation(fields: [mistakeCategoryId], references: [id], onDelete: Cascade)
+
+  @@id([tradeId, mistakeCategoryId])
+}
+
+model TradeAttachment {
+  id        String         @id @default(cuid())
+  tradeId   String
+  url       String
+  type      AttachmentType
+  caption   String?
+  createdAt DateTime       @default(now())
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId])
+}
+
+// ---------- Import ----------
+
+model ImportBatch {
+  id               String       @id @default(cuid())
+  userId           String
+  tradingAccountId String
+  source           String
+  fileName         String
+  status           ImportStatus @default(PENDING)
+  rowsTotal        Int          @default(0)
+  rowsImported     Int          @default(0)
+  rowsFailed       Int          @default(0)
+  createdAt        DateTime     @default(now())
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tradingAccount TradingAccount @relation(fields: [tradingAccountId], references: [id], onDelete: Cascade)
+  trades         Trade[]
+
+  @@index([userId])
+}

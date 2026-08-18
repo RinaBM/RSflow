@@ -81,7 +81,7 @@ model TradingAccount {
 model Trade {
   id              String        @id @default(cuid())
   userId          String
-  tradingAccountId String
+  tradingAccountId String?
   symbol          String
   side            TradeSide
   entryTime       DateTime
@@ -110,7 +110,7 @@ model Trade {
   updatedAt       DateTime      @updatedAt
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tradingAccount TradingAccount  @relation(fields: [tradingAccountId], references: [id], onDelete: Cascade)
+  tradingAccount TradingAccount? @relation(fields: [tradingAccountId], references: [id], onDelete: SetNull)
   strategy       Strategy?       @relation(fields: [strategyId], references: [id], onDelete: SetNull)
   setup          Setup?          @relation(fields: [setupId], references: [id], onDelete: SetNull)
   importBatch    ImportBatch?    @relation(fields: [importBatchId], references: [id], onDelete: SetNull)

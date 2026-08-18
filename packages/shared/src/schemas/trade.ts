@@ -12,7 +12,7 @@ const tradeStatusSchema = z.enum(TRADE_STATUSES);
 
 export const createTradeSchema = z
   .object({
-    tradingAccountId: z.string().min(1),
+    tradingAccountId: z.string().min(1).optional(),
     symbol: z
       .string()
       .trim()
@@ -51,7 +51,7 @@ export type CreateTradeInput = z.infer<typeof createTradeSchema>;
 
 export const updateTradeSchema = z
   .object({
-    tradingAccountId: z.string().min(1).optional(),
+    tradingAccountId: z.string().min(1).nullable().optional(),
     symbol: z
       .string()
       .trim()
@@ -100,7 +100,7 @@ export type TradeListQuery = z.infer<typeof tradeListQuerySchema>;
 export const tradeSchema = z.object({
   id: z.string(),
   userId: z.string(),
-  tradingAccountId: z.string(),
+  tradingAccountId: z.string().nullable(),
   symbol: z.string(),
   side: tradeSideSchema,
   entryTime: z.string(),

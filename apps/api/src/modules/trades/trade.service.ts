@@ -143,6 +143,17 @@ async function setTradeMistakes(tradeId: string, mistakeCategoryIds: string[]) {
   ]);
 }
 
+export async function listRecentSymbols(userId: string): Promise<string[]> {
+  const rows = await prisma.trade.findMany({
+    where: { userId },
+    distinct: ["symbol"],
+    orderBy: { entryTime: "desc" },
+    select: { symbol: true },
+    take: 20,
+  });
+  return rows.map((r) => r.symbol);
+}
+
 export async function listTrades(userId: string, query: TradeListQuery): Promise<Paginated<ReturnType<typeof serialize>>> {
   const where: Prisma.TradeWhereInput = {
     userId,
@@ -198,7 +209,7 @@ export async function getTradeById(userId: string, id: string) {
 }
 
 export async function createTrade(userId: string, input: CreateTradeInput) {
-  await assertOwnsTradingAccount(userId, input.tradingAccountId);
+  if (input.tradingAccountId) await assertOwnsTradingAccount(userId, input.tradingAccountId);
   if (input.strategyId) await assertOwnsStrategy(userId, input.strategyId);
   if (input.setupId) await assertOwnsSetup(userId, input.setupId);
   if (input.tagIds) await assertOwnsTags(userId, input.tagIds);
@@ -215,7 +226,7 @@ export async function createTrade(userId: string, input: CreateTradeInput) {
   const trade = await prisma.trade.create({
     data: {
       userId,
-      tradingAccountId: input.tradingAccountId,
+      tradingAccountId: input.tradingAccountId ?? null,
       symbol: input.symbol,
       side: input.side,
       entryTime: input.entryTime,
@@ -251,7 +262,7 @@ export async function createTrade(userId: string, input: CreateTradeInput) {
 export async function updateTrade(userId: string, id: string, input: UpdateTradeInput) {
   const existing = await findOwnedTradeOrThrow(userId, id);
 
-  if (input.tradingAccountId) {
+  if (input.tradingAccountId != null) {
     await assertOwnsTradingAccount(userId, input.tradingAccountId);
   }
   if (input.strategyId) await assertOwnsStrategy(userId, input.strategyId);
@@ -271,7 +282,7 @@ export async function updateTrade(userId: string, id: string, input: UpdateTrade
   const trade = await prisma.trade.update({
     where: { id },
     data: {
-      ...(input.tradingAccountId ? { tradingAccountId: input.tradingAccountId } : {}),
+      ...(input.tradingAccountId !== undefined ? { tradingAccountId: input.tradingAccountId } : {}),
       ...(input.symbol ? { symbol: input.symbol } : {}),
       ...(input.side ? { side: input.side } : {}),
       ...(input.entryTime ? { entryTime: input.entryTime } : {}),

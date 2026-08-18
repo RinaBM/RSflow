@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Wallet } from "lucide-react";
 import type { TradingAccount } from "@rs-flow/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ApiError } from "@/lib/api-client";
 import { useDeleteTradingAccount, useTradingAccounts } from "@/features/trading-accounts/hooks";
 import { AccountFormDialog } from "@/features/trading-accounts/account-form-dialog";
@@ -57,13 +58,17 @@ export function TradingAccountsPage() {
           {error instanceof ApiError ? error.message : "Failed to load trading accounts"}
         </div>
       ) : data?.items.length === 0 ? (
-        <div className="flex h-40 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground">
-          No trading accounts yet.
-          <Button variant="outline" onClick={openCreateDialog}>
-            <Plus className="h-4 w-4" />
-            Create your first account
-          </Button>
-        </div>
+        <EmptyState
+          icon={Wallet}
+          title="No trading accounts yet"
+          description="Accounts are optional — you can log trades without one and attach an account later."
+          action={
+            <Button variant="outline" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4" />
+              Create your first account
+            </Button>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data?.items.map((account) => (

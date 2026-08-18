@@ -3,7 +3,7 @@ import { createAttachmentSchema, createTradeSchema, tradeListQuerySchema, update
 import { asyncHandler } from "../../common/async-handler.js";
 import { validateBody, validateQuery } from "../../common/validate.js";
 import { requireAuth } from "../auth/auth.middleware.js";
-import { create, getOne, list, remove, update } from "./trade.controller.js";
+import { create, getOne, list, recentSymbols, remove, update } from "./trade.controller.js";
 import {
   create as createAttachmentHandler,
   list as listAttachmentsHandler,
@@ -16,6 +16,7 @@ tradeRouter.use(requireAuth);
 
 tradeRouter.get("/", validateQuery(tradeListQuerySchema), asyncHandler(list));
 tradeRouter.post("/", validateBody(createTradeSchema), asyncHandler(create));
+tradeRouter.get("/symbols", asyncHandler(recentSymbols));
 tradeRouter.get("/:id", asyncHandler(getOne));
 tradeRouter.patch("/:id", validateBody(updateTradeSchema), asyncHandler(update));
 tradeRouter.delete("/:id", asyncHandler(remove));

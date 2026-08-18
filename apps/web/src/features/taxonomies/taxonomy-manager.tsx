@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Dialog,
   DialogContent,
@@ -98,15 +99,18 @@ export function TaxonomyManager<T extends TaxonomyItem>({
           {error instanceof ApiError ? error.message : `Failed to load ${title.toLowerCase()}`}
         </div>
       ) : data?.items.length === 0 ? (
-        <div className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground">
-          No {title.toLowerCase()} yet.
-          <Button variant="outline" size="sm" onClick={openCreate}>
-            <Plus className="h-4 w-4" />
-            Create your first {singularLabel}
-          </Button>
-        </div>
+        <EmptyState
+          icon={Layers}
+          title={`No ${title.toLowerCase()} yet`}
+          action={
+            <Button variant="outline" size="sm" onClick={openCreate}>
+              <Plus className="h-4 w-4" />
+              Create your first {singularLabel}
+            </Button>
+          }
+        />
       ) : (
-        <div className="divide-y divide-border rounded-xl border border-border">
+        <div className="divide-y divide-border rounded-lg border border-border">
           {data?.items.map((item) => (
             <div key={item.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <div className="flex min-w-0 items-center gap-2">

@@ -6,18 +6,20 @@ interface StatTileProps {
   tone?: "neutral" | "profit" | "loss" | "auto";
   numericValue?: number | null;
   sublabel?: string;
+  size?: "default" | "hero";
 }
 
-export function StatTile({ label, value, tone = "neutral", numericValue, sublabel }: StatTileProps) {
+export function StatTile({ label, value, tone = "neutral", numericValue, sublabel, size = "default" }: StatTileProps) {
   const resolvedTone =
     tone === "auto" ? (numericValue == null ? "neutral" : numericValue >= 0 ? "profit" : "loss") : tone;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+    <div className={cn("rounded-lg border border-border bg-card", size === "hero" ? "p-5" : "p-3.5")}>
+      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div
         className={cn(
-          "mt-1.5 text-2xl font-semibold",
+          "mt-1.5 font-mono font-semibold tabular-nums",
+          size === "hero" ? "text-3xl" : "text-xl",
           resolvedTone === "profit" && "text-profit",
           resolvedTone === "loss" && "text-loss",
         )}

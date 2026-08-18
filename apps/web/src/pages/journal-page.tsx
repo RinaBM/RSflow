@@ -12,6 +12,7 @@ import type { Trade } from "@rs-flow/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ApiError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
@@ -20,6 +21,7 @@ import { useDeleteTrade, useTrades } from "@/features/trades/hooks";
 import { TradeFormDialog } from "@/features/trades/trade-form-dialog";
 
 const PAGE_SIZE = 25;
+const NUMERIC_COLUMN_IDS = new Set(["quantity", "netPnl", "returnPct"]);
 
 function formatDateTime(iso: string | null) {
   if (!iso) return "—";
@@ -97,7 +99,14 @@ export function JournalPage() {
         accessorKey: "side",
         header: "Side",
         cell: ({ row }) => (
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
+          <span
+            className={cn(
+              "rounded border px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+              row.original.side === "LONG"
+                ? "border-profit/40 bg-profit/10 text-profit"
+                : "border-loss/40 bg-loss/10 text-loss",
+            )}
+          >
             {row.original.side}
           </span>
         ),
@@ -105,12 +114,12 @@ export function JournalPage() {
       {
         accessorKey: "entryTime",
         header: "Entry",
-        cell: ({ row }) => formatDateTime(row.original.entryTime),
+        cell: ({ row }) => <span className="text-muted-foreground">{formatDateTime(row.original.entryTime)}</span>,
       },
       {
         accessorKey: "exitTime",
         header: "Exit",
-        cell: ({ row }) => formatDateTime(row.original.exitTime),
+        cell: ({ row }) => <span className="text-muted-foreground">{formatDateTime(row.original.exitTime)}</span>,
       },
       {
         accessorKey: "quantity",
@@ -123,7 +132,7 @@ export function JournalPage() {
         cell: ({ row }) => {
           const value = row.original.netPnl;
           return (
-            <span className={cn("font-medium", value == null ? "" : value >= 0 ? "text-profit" : "text-loss")}>
+            <span className={cn("font-semibold", value == null ? "" : value >= 0 ? "text-profit" : "text-loss")}>
               {value == null ? "—" : `${value >= 0 ? "+" : ""}${formatNumber(value)}`}
             </span>
           );
@@ -138,7 +147,14 @@ export function JournalPage() {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+          <span
+            className={cn(
+              "rounded border px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+              row.original.status === "OPEN"
+                ? "border-status-open/40 bg-status-open/10 text-status-open"
+                : "border-border text-muted-foreground",
+            )}
+          >
             {row.original.status}
           </span>
         ),
@@ -253,31 +269,37 @@ export function JournalPage() {
           {error instanceof ApiError ? error.message : "Failed to load trades"}
         </div>
       ) : data?.items.length === 0 ? (
-        <div className="flex h-40 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground">
-          No trades match these filters.
-          <Button variant="outline" onClick={openCreateDialog}>
-            <Plus className="h-4 w-4" />
-            Log your first trade
-          </Button>
-        </div>
+        <EmptyState
+          icon={NotebookText}
+          title="No trades match these filters"
+          description="Try clearing a filter, or log a new trade to get started."
+          action={
+            <Button variant="outline" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4" />
+              Log your first trade
+            </Button>
+          }
+        />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
-            <thead className="border-b border-border bg-card">
+            <thead className="sticky top-0 z-10 border-b border-border bg-surface-2">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const sortDirection = header.column.getIsSorted();
+                    const numeric = NUMERIC_COLUMN_IDS.has(header.column.id);
                     return (
                       <th
                         key={header.id}
                         className={cn(
-                          "px-4 py-3 text-left font-medium text-muted-foreground",
+                          "px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground",
+                          numeric && "text-right",
                           header.column.getCanSort() && "cursor-pointer select-none",
                         )}
                         onClick={header.column.getToggleSortingHandler()}
                       >
-                        <span className="inline-flex items-center gap-1">
+                        <span className={cn("inline-flex items-center gap-1", numeric && "flex-row-reverse")}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {header.column.getCanSort() ? (
                             sortDirection === "asc" ? (
@@ -297,9 +319,15 @@ export function JournalPage() {
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b border-border last:border-0 hover:bg-accent/50">
+                <tr key={row.id} className="border-b border-border last:border-0 hover:bg-accent/40">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3">
+                    <td
+                      key={cell.id}
+                      className={cn(
+                        "px-4 py-2.5",
+                        NUMERIC_COLUMN_IDS.has(cell.column.id) && "text-right font-mono tabular-nums",
+                      )}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

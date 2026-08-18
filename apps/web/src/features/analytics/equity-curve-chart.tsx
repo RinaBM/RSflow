@@ -31,14 +31,14 @@ function EquityTooltip({ active, payload }: { active?: boolean; payload?: Toolti
 export function EquityCurveChart({ data }: { data: EquityCurvePoint[] }) {
   if (data.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted-foreground">
+      <div className="flex h-64 items-center justify-center rounded-lg border border-border bg-card text-sm text-muted-foreground">
         Close a trade to start building your equity curve.
       </div>
     );
   }
 
   return (
-    <div className="h-64 rounded-xl border border-border bg-card p-4">
+    <div className="h-64 rounded-lg border border-border bg-card p-4">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <defs>

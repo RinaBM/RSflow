@@ -13,10 +13,19 @@ export function useTrades(query: Partial<TradeListQuery>, options?: { enabled?: 
   });
 }
 
-export function useTrade(id: string) {
+export function useRecentSymbols() {
+  return useQuery({
+    queryKey: [...TRADES_QUERY_KEY, "symbols"],
+    queryFn: tradesApi.recentSymbols,
+    staleTime: 60_000,
+  });
+}
+
+export function useTrade(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...TRADES_QUERY_KEY, "detail", id],
     queryFn: () => tradesApi.getById(id),
+    enabled: (options?.enabled ?? true) && Boolean(id),
   });
 }
 

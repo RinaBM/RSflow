@@ -26,6 +26,7 @@ export const tradesApi = {
   create: (input: CreateTradeInput) => api.post<{ trade: Trade }>("/trades", input),
   update: (id: string, input: UpdateTradeInput) => api.patch<{ trade: Trade }>(`/trades/${id}`, input),
   remove: (id: string) => api.delete<void>(`/trades/${id}`),
+  recentSymbols: () => api.get<{ symbols: string[] }>("/trades/symbols"),
 };
 
 export const tradeAttachmentsApi = {

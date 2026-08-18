@@ -30,13 +30,13 @@ function PeriodTooltip({ active, payload }: { active?: boolean; payload?: Toolti
 export function PeriodPnlChart({ title, data }: { title: string; data: PeriodSummary[] }) {
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+      <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">{title}</h3>
       {data.length === 0 ? (
-        <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted-foreground">
+        <div className="flex h-48 items-center justify-center rounded-lg border border-border bg-card text-sm text-muted-foreground">
           No data for the selected filters.
         </div>
       ) : (
-        <div className="h-48 rounded-xl border border-border bg-card p-4">
+        <div className="h-48 rounded-lg border border-border bg-card p-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
               <CartesianGrid vertical={false} stroke="var(--border)" />

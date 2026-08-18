@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3 } from "lucide-react";
 import type { GroupPerformance } from "@rs-flow/shared";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 
 type SortKey = "label" | "tradeCount" | "netPnl" | "winRate" | "averageTrade" | "profitFactor";
+
+const NUMERIC_KEYS = new Set<SortKey>(["tradeCount", "netPnl", "winRate", "averageTrade", "profitFactor"]);
 
 const COLUMNS: { key: SortKey; header: string }[] = [
   { key: "label", header: "Name" },
@@ -57,49 +60,60 @@ export function PerformanceTable({ title, data, emptyLabel }: PerformanceTablePr
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+      <h3 className="px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">{title}</h3>
       {data.length === 0 ? (
-        <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted-foreground">
-          {emptyLabel ?? "No data for the selected filters."}
-        </div>
+        <EmptyState icon={BarChart3} title={emptyLabel ?? "No data for the selected filters"} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
-            <thead className="border-b border-border bg-card">
+            <thead className="border-b border-border bg-surface-2">
               <tr>
-                {COLUMNS.map((col) => (
-                  <th
-                    key={col.key}
-                    onClick={() => handleSort(col.key)}
-                    className="cursor-pointer select-none px-4 py-2 text-left font-medium text-muted-foreground"
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      {col.header}
-                      {sortKey === col.key ? (
-                        sortDesc ? (
-                          <ArrowDown className="h-3 w-3" />
-                        ) : (
-                          <ArrowUp className="h-3 w-3" />
-                        )
-                      ) : (
-                        <ArrowUpDown className="h-3 w-3 opacity-40" />
+                {COLUMNS.map((col) => {
+                  const numeric = NUMERIC_KEYS.has(col.key);
+                  return (
+                    <th
+                      key={col.key}
+                      onClick={() => handleSort(col.key)}
+                      className={cn(
+                        "cursor-pointer select-none px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground",
+                        numeric && "text-right",
                       )}
-                    </span>
-                  </th>
-                ))}
+                    >
+                      <span className={cn("inline-flex items-center gap-1", numeric && "flex-row-reverse")}>
+                        {col.header}
+                        {sortKey === col.key ? (
+                          sortDesc ? (
+                            <ArrowDown className="h-3 w-3" />
+                          ) : (
+                            <ArrowUp className="h-3 w-3" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-3 w-3 opacity-40" />
+                        )}
+                      </span>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
               {sorted.map((row) => (
-                <tr key={row.key} className="border-b border-border last:border-0">
-                  <td className="px-4 py-2 font-medium">{row.label}</td>
-                  <td className="px-4 py-2">{row.tradeCount}</td>
-                  <td className={cn("px-4 py-2 font-medium", row.netPnl >= 0 ? "text-profit" : "text-loss")}>
+                <tr key={row.key} className="border-b border-border last:border-0 hover:bg-accent/40">
+                  <td className="px-4 py-2.5 font-medium">{row.label}</td>
+                  <td className="px-4 py-2.5 text-right font-mono tabular-nums">{row.tradeCount}</td>
+                  <td
+                    className={cn(
+                      "px-4 py-2.5 text-right font-mono tabular-nums font-semibold",
+                      row.netPnl >= 0 ? "text-profit" : "text-loss",
+                    )}
+                  >
                     {formatCurrency(row.netPnl)}
                   </td>
-                  <td className="px-4 py-2">{formatPercent(row.winRate)}</td>
-                  <td className="px-4 py-2">{formatCurrency(row.averageTrade ?? 0)}</td>
-                  <td className="px-4 py-2">{formatRatio(row.profitFactor)}</td>
+                  <td className="px-4 py-2.5 text-right font-mono tabular-nums">{formatPercent(row.winRate)}</td>
+                  <td className="px-4 py-2.5 text-right font-mono tabular-nums">
+                    {formatCurrency(row.averageTrade ?? 0)}
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono tabular-nums">{formatRatio(row.profitFactor)}</td>
                 </tr>
               ))}
             </tbody>

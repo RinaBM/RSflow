@@ -95,7 +95,7 @@ export function CalendarPage() {
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-6 rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center gap-6 rounded-lg border border-border bg-card p-4">
             <div>
               <div className="text-xs text-muted-foreground">Monthly P&L</div>
               <div
@@ -116,7 +116,7 @@ export function CalendarPage() {
             ) : null}
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-border">
+          <div className="overflow-hidden rounded-lg border border-border">
             <div className="grid grid-cols-7 border-b border-border bg-card">
               {WEEKDAYS.map((day) => (
                 <div key={day} className="p-2 text-center text-xs font-medium text-muted-foreground">

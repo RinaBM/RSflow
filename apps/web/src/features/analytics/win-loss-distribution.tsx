@@ -22,8 +22,10 @@ export function WinLossDistributionCard({ distribution }: { distribution: WinLos
   ];
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
-      <h3 className="text-sm font-medium text-muted-foreground">Win / loss distribution</h3>
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
+      <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+        Win / loss distribution
+      </h3>
 
       {total === 0 ? (
         <div className="flex h-16 items-center justify-center text-sm text-muted-foreground">

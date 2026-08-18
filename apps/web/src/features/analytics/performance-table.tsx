@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowDown, ArrowUp, ArrowUpDown, BarChart3 } from "lucide-react";
 import type { GroupPerformance } from "@rs-flow/shared";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -7,15 +8,6 @@ import { cn } from "@/lib/utils";
 type SortKey = "label" | "tradeCount" | "netPnl" | "winRate" | "averageTrade" | "profitFactor";
 
 const NUMERIC_KEYS = new Set<SortKey>(["tradeCount", "netPnl", "winRate", "averageTrade", "profitFactor"]);
-
-const COLUMNS: { key: SortKey; header: string }[] = [
-  { key: "label", header: "Name" },
-  { key: "tradeCount", header: "Trades" },
-  { key: "netPnl", header: "Net P&L" },
-  { key: "winRate", header: "Win rate" },
-  { key: "averageTrade", header: "Avg trade" },
-  { key: "profitFactor", header: "Profit factor" },
-];
 
 function formatCurrency(value: number) {
   return value.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -36,8 +28,18 @@ interface PerformanceTableProps {
 }
 
 export function PerformanceTable({ title, data, emptyLabel }: PerformanceTableProps) {
+  const { t } = useTranslation();
   const [sortKey, setSortKey] = useState<SortKey>("netPnl");
   const [sortDesc, setSortDesc] = useState(true);
+
+  const COLUMNS: { key: SortKey; header: string }[] = [
+    { key: "label", header: t("performanceTable.name") },
+    { key: "tradeCount", header: t("performanceTable.trades") },
+    { key: "netPnl", header: t("performanceTable.netPnl") },
+    { key: "winRate", header: t("performanceTable.winRate") },
+    { key: "averageTrade", header: t("performanceTable.avgTrade") },
+    { key: "profitFactor", header: t("performanceTable.profitFactor") },
+  ];
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -62,7 +64,7 @@ export function PerformanceTable({ title, data, emptyLabel }: PerformanceTablePr
     <div className="flex flex-col gap-2">
       <h3 className="px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">{title}</h3>
       {data.length === 0 ? (
-        <EmptyState icon={BarChart3} title={emptyLabel ?? "No data for the selected filters"} />
+        <EmptyState icon={BarChart3} title={emptyLabel ?? t("performanceTable.emptyDefault")} />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">

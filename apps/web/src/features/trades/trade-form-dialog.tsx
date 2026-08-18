@@ -260,8 +260,8 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
           <DialogDescription>{t("trade.description")}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex max-h-[75vh] flex-col gap-5 overflow-y-auto pr-1">
-          <div className="flex gap-3">
+        <form onSubmit={handleSubmit} className="flex max-h-[75vh] flex-col gap-5 overflow-y-auto pe-1">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="flex flex-1 flex-col gap-1.5">
               <Label htmlFor="trade-symbol">{t("trade.symbol")}</Label>
               <Input
@@ -339,7 +339,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="trade-entry-price">{t("trade.entryPrice")}</Label>
                 <SteppedNumberInput
@@ -367,7 +367,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="trade-quantity">{t("trade.quantity")}</Label>
                 <SteppedNumberInput
@@ -397,7 +397,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
           </div>
 
           {preview ? (
-            <div className="grid grid-cols-4 gap-3 rounded-lg border border-border bg-muted/30 p-3 text-center">
+            <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-muted/30 p-3 text-center sm:grid-cols-4">
               <div>
                 <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("trade.grossPnl")}</div>
                 <div
@@ -449,7 +449,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <QuickAddSelect
               id="trade-strategy"
               label={t("trade.strategy")}

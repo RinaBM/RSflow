@@ -1,14 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ApiError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { useCalendarSummary } from "@/features/calendar/hooks";
 import { useTrades } from "@/features/trades/hooks";
-
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function formatCurrency(value: number) {
   return value.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -29,6 +28,8 @@ function buildMonthGrid(year: number, month: number): (number | null)[] {
 }
 
 export function CalendarPage() {
+  const { t } = useTranslation();
+  const weekdays = t("calendar.weekdays", { returnObjects: true }) as string[];
   const today = new Date();
   const [year, setYear] = useState(today.getUTCFullYear());
   const [month, setMonth] = useState(today.getUTCMonth() + 1);
@@ -69,10 +70,10 @@ export function CalendarPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Calendar</h1>
-          <p className="text-sm text-muted-foreground">Daily P&L at a glance.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("calendar.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("calendar.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={goToPreviousMonth}>
@@ -87,18 +88,19 @@ export function CalendarPage() {
 
       {isLoading ? (
         <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-          Loading calendar…
+          {t("calendar.loading")}
         </div>
       ) : isError ? (
         <div className="flex h-64 items-center justify-center text-sm text-destructive">
-          {error instanceof ApiError ? error.message : "Failed to load calendar"}
+          {error instanceof ApiError ? error.message : t("calendar.loadFailed")}
         </div>
       ) : (
         <>
           <div className="flex items-center gap-6 rounded-lg border border-border bg-card p-4">
             <div>
-              <div className="text-xs text-muted-foreground">Monthly P&L</div>
+              <div className="text-xs text-muted-foreground">{t("calendar.monthlyPnl")}</div>
               <div
+                dir="ltr"
                 className={cn(
                   "text-xl font-semibold",
                   (data?.monthlyNetPnl ?? 0) >= 0 ? "text-profit" : "text-loss",
@@ -108,17 +110,17 @@ export function CalendarPage() {
               </div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Trades</div>
+              <div className="text-xs text-muted-foreground">{t("calendar.trades")}</div>
               <div className="text-xl font-semibold">{data?.monthlyTradeCount ?? 0}</div>
             </div>
             {data?.monthlyTradeCount === 0 ? (
-              <div className="text-sm text-muted-foreground">No trades recorded this month.</div>
+              <div className="text-sm text-muted-foreground">{t("calendar.noTradesMonth")}</div>
             ) : null}
           </div>
 
           <div className="overflow-hidden rounded-lg border border-border">
             <div className="grid grid-cols-7 border-b border-border bg-card">
-              {WEEKDAYS.map((day) => (
+              {weekdays.map((day) => (
                 <div key={day} className="p-2 text-center text-xs font-medium text-muted-foreground">
                   {day}
                 </div>
@@ -127,7 +129,7 @@ export function CalendarPage() {
             <div className="grid grid-cols-7">
               {grid.map((day, i) => {
                 if (day == null) {
-                  return <div key={`empty-${i}`} className="h-24 border-b border-r border-border bg-card/40" />;
+                  return <div key={`empty-${i}`} className="h-24 border-b border-e border-border bg-card/40" />;
                 }
                 const dateKey = toDateKey(year, month, day);
                 const summary = dayMap.get(dateKey);
@@ -140,16 +142,19 @@ export function CalendarPage() {
                     disabled={!hasTrades}
                     onClick={() => setSelectedDate(dateKey)}
                     className={cn(
-                      "flex h-24 flex-col items-start gap-1 border-b border-r border-border p-2 text-left transition-colors",
+                      "flex h-24 flex-col items-start gap-1 border-b border-e border-border p-2 text-start transition-colors",
                       hasTrades ? "cursor-pointer hover:bg-accent" : "cursor-default",
                       summary && summary.netPnl > 0 && "bg-profit/10",
                       summary && summary.netPnl < 0 && "bg-loss/10",
                     )}
                   >
-                    <span className="text-xs text-muted-foreground">{day}</span>
+                    <span className="text-xs text-muted-foreground" dir="ltr">
+                      {day}
+                    </span>
                     {hasTrades ? (
                       <>
                         <span
+                          dir="ltr"
                           className={cn(
                             "text-sm font-semibold",
                             summary!.netPnl > 0 ? "text-profit" : summary!.netPnl < 0 ? "text-loss" : "",
@@ -158,7 +163,8 @@ export function CalendarPage() {
                           {formatCurrency(summary!.netPnl)}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {summary!.tradeCount} trade{summary!.tradeCount === 1 ? "" : "s"}
+                          {summary!.tradeCount}{" "}
+                          {summary!.tradeCount === 1 ? t("calendar.tradeCountSuffix") : t("calendar.tradeCountSuffixPlural")}
                         </span>
                       </>
                     ) : null}
@@ -176,6 +182,7 @@ export function CalendarPage() {
 }
 
 function DayTradesDialog({ date, onOpenChange }: { date: string | null; onOpenChange: (open: boolean) => void }) {
+  const { t } = useTranslation();
   const dateFrom = date ? new Date(`${date}T00:00:00.000Z`) : undefined;
   const dateTo = date ? new Date(`${date}T23:59:59.999Z`) : undefined;
 
@@ -197,7 +204,7 @@ function DayTradesDialog({ date, onOpenChange }: { date: string | null; onOpenCh
           <DialogTitle>{date ? new Date(`${date}T00:00:00`).toLocaleDateString() : ""}</DialogTitle>
         </DialogHeader>
         {isLoading ? (
-          <div className="py-6 text-center text-sm text-muted-foreground">Loading trades…</div>
+          <div className="py-6 text-center text-sm text-muted-foreground">{t("calendar.loadingTrades")}</div>
         ) : (
           <div className="flex flex-col divide-y divide-border">
             {data?.items.map((trade) => (
@@ -209,7 +216,7 @@ function DayTradesDialog({ date, onOpenChange }: { date: string | null; onOpenCh
                 <span>
                   {trade.symbol} · {trade.side}
                 </span>
-                <span className={cn("font-medium", (trade.netPnl ?? 0) >= 0 ? "text-profit" : "text-loss")}>
+                <span dir="ltr" className={cn("font-medium", (trade.netPnl ?? 0) >= 0 ? "text-profit" : "text-loss")}>
                   {trade.netPnl != null ? formatCurrency(trade.netPnl) : "—"}
                 </span>
               </Link>

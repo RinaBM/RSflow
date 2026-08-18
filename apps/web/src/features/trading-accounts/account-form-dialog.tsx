@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import type { TradingAccount } from "@rs-flow/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface AccountFormDialogProps {
 }
 
 export function AccountFormDialog({ open, onOpenChange, account }: AccountFormDialogProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(account);
   const create = useCreateTradingAccount();
   const update = useUpdateTradingAccount();
@@ -57,19 +59,19 @@ export function AccountFormDialog({ open, onOpenChange, account }: AccountFormDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit trading account" : "New trading account"}</DialogTitle>
+          <DialogTitle>{isEdit ? t("accountForm.editTitle") : t("accountForm.newTitle")}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update the details of this account." : "Add an account to track trades against."}
+            {isEdit ? t("accountForm.editDescription") : t("accountForm.newDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="acc-name">Name</Label>
+            <Label htmlFor="acc-name">{t("accountForm.name")}</Label>
             <Input id="acc-name" required value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="acc-broker">Broker</Label>
+            <Label htmlFor="acc-broker">{t("accountForm.broker")}</Label>
             <Input
               id="acc-broker"
               required
@@ -78,23 +80,25 @@ export function AccountFormDialog({ open, onOpenChange, account }: AccountFormDi
               placeholder="e.g. Colmex Pro"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="acc-currency">Currency</Label>
+              <Label htmlFor="acc-currency">{t("accountForm.currency")}</Label>
               <Input
                 id="acc-currency"
                 required
                 maxLength={3}
+                dir="ltr"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value.toUpperCase())}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="acc-balance">Starting balance</Label>
+              <Label htmlFor="acc-balance">{t("accountForm.startingBalance")}</Label>
               <Input
                 id="acc-balance"
                 type="number"
                 step="0.01"
+                dir="ltr"
                 value={startingBalance}
                 onChange={(e) => setStartingBalance(e.target.value)}
               />
@@ -103,10 +107,10 @@ export function AccountFormDialog({ open, onOpenChange, account }: AccountFormDi
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("accountForm.cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Saving…" : "Save"}
+              {mutation.isPending ? t("accountForm.saving") : t("accountForm.save")}
             </Button>
           </DialogFooter>
         </form>

@@ -9,7 +9,11 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET must be at least 16 chars"),
   ACCESS_TOKEN_TTL: z.string().default("15m"),
   REFRESH_TOKEN_TTL: z.string().default("30d"),
-  WEB_ORIGIN: z.string().url().default("http://localhost:5173"),
+  // Comma-separated list of allowed frontend origins (e.g. localhost plus a LAN IP for testing on another device).
+  WEB_ORIGIN: z
+    .string()
+    .default("http://localhost:5173")
+    .transform((val) => val.split(",").map((origin) => origin.trim()).filter(Boolean)),
 });
 
 const parsed = envSchema.safeParse(process.env);

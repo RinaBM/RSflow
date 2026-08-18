@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, NotebookText, Pencil, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { Trade } from "@rs-flow/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ function formatNumber(value: number | null, digits = 2) {
 }
 
 export function JournalPage() {
+  const { t } = useTranslation();
   const { data: accountsData } = useTradingAccounts();
   const deleteTrade = useDeleteTrade();
 
@@ -78,9 +80,9 @@ export function JournalPage() {
   }
 
   function handleDelete(trade: Trade) {
-    if (!window.confirm(`Delete the ${trade.symbol} trade?`)) return;
+    if (!window.confirm(t("journal.deleteConfirm", { symbol: trade.symbol }))) return;
     deleteTrade.mutate(trade.id, {
-      onError: (err) => window.alert(err instanceof ApiError ? err.message : "Failed to delete trade"),
+      onError: (err) => window.alert(err instanceof ApiError ? err.message : t("journal.deleteFailed")),
     });
   }
 
@@ -88,7 +90,7 @@ export function JournalPage() {
     () => [
       {
         accessorKey: "symbol",
-        header: "Symbol",
+        header: t("journal.columns.symbol"),
         cell: ({ row }) => (
           <Link to={`/journal/${row.original.id}`} className="font-medium hover:underline">
             {row.original.symbol}
@@ -97,7 +99,7 @@ export function JournalPage() {
       },
       {
         accessorKey: "side",
-        header: "Side",
+        header: t("journal.columns.side"),
         cell: ({ row }) => (
           <span
             className={cn(
@@ -113,22 +115,30 @@ export function JournalPage() {
       },
       {
         accessorKey: "entryTime",
-        header: "Entry",
-        cell: ({ row }) => <span className="text-muted-foreground">{formatDateTime(row.original.entryTime)}</span>,
+        header: t("journal.columns.entry"),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground" dir="ltr">
+            {formatDateTime(row.original.entryTime)}
+          </span>
+        ),
       },
       {
         accessorKey: "exitTime",
-        header: "Exit",
-        cell: ({ row }) => <span className="text-muted-foreground">{formatDateTime(row.original.exitTime)}</span>,
+        header: t("journal.columns.exit"),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground" dir="ltr">
+            {formatDateTime(row.original.exitTime)}
+          </span>
+        ),
       },
       {
         accessorKey: "quantity",
-        header: "Qty",
+        header: t("journal.columns.qty"),
         cell: ({ row }) => formatNumber(row.original.quantity, 0),
       },
       {
         accessorKey: "netPnl",
-        header: "Net P&L",
+        header: t("journal.columns.netPnl"),
         cell: ({ row }) => {
           const value = row.original.netPnl;
           return (
@@ -140,12 +150,12 @@ export function JournalPage() {
       },
       {
         accessorKey: "returnPct",
-        header: "Return %",
+        header: t("journal.columns.returnPct"),
         cell: ({ row }) => (row.original.returnPct == null ? "—" : `${formatNumber(row.original.returnPct)}%`),
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: t("journal.columns.status"),
         cell: ({ row }) => (
           <span
             className={cn(
@@ -166,7 +176,7 @@ export function JournalPage() {
         cell: ({ row }) => (
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="icon" asChild>
-              <Link to={`/journal/${row.original.id}`} title="Review">
+              <Link to={`/journal/${row.original.id}`} title={t("journal.review")}>
                 <NotebookText className="h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -180,7 +190,8 @@ export function JournalPage() {
         ),
       },
     ],
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleDelete/openEditDialog close over stable setters only
+    [t],
   );
 
   const table = useReactTable({
@@ -198,20 +209,20 @@ export function JournalPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Journal</h1>
-          <p className="text-sm text-muted-foreground">Search, filter and manage every trade.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("journal.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("journal.subtitle")}</p>
         </div>
         <Button onClick={openCreateDialog}>
           <Plus className="h-4 w-4" />
-          New trade
+          {t("journal.newTrade")}
         </Button>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <Input
-          placeholder="Search symbol…"
+          placeholder={t("journal.searchSymbol")}
           value={symbolInput}
           onChange={(e) => {
             setSymbolInput(e.target.value);
@@ -227,7 +238,7 @@ export function JournalPage() {
           }}
           className="w-44"
         >
-          <option value="">All accounts</option>
+          <option value="">{t("filters.allAccounts")}</option>
           {accountsData?.items.map((account) => (
             <option key={account.id} value={account.id}>
               {account.name}
@@ -242,9 +253,9 @@ export function JournalPage() {
           }}
           className="w-32"
         >
-          <option value="">Long &amp; Short</option>
-          <option value="LONG">Long</option>
-          <option value="SHORT">Short</option>
+          <option value="">{t("filters.longShort")}</option>
+          <option value="LONG">{t("filters.long")}</option>
+          <option value="SHORT">{t("filters.short")}</option>
         </Select>
         <Select
           value={status}
@@ -254,29 +265,29 @@ export function JournalPage() {
           }}
           className="w-32"
         >
-          <option value="">Open &amp; Closed</option>
-          <option value="OPEN">Open</option>
-          <option value="CLOSED">Closed</option>
+          <option value="">{t("journal.openClosed")}</option>
+          <option value="OPEN">{t("journal.open")}</option>
+          <option value="CLOSED">{t("journal.closed")}</option>
         </Select>
       </div>
 
       {isLoading ? (
         <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-          Loading trades…
+          {t("journal.loading")}
         </div>
       ) : isError ? (
         <div className="flex h-40 items-center justify-center text-sm text-destructive">
-          {error instanceof ApiError ? error.message : "Failed to load trades"}
+          {error instanceof ApiError ? error.message : t("journal.loadFailed")}
         </div>
       ) : data?.items.length === 0 ? (
         <EmptyState
           icon={NotebookText}
-          title="No trades match these filters"
-          description="Try clearing a filter, or log a new trade to get started."
+          title={t("journal.emptyTitle")}
+          description={t("journal.emptyDescription")}
           action={
             <Button variant="outline" onClick={openCreateDialog}>
               <Plus className="h-4 w-4" />
-              Log your first trade
+              {t("journal.logFirstTrade")}
             </Button>
           }
         />
@@ -336,9 +347,10 @@ export function JournalPage() {
             </tbody>
           </table>
 
-          <div className="flex items-center justify-between border-t border-border px-4 py-3 text-sm text-muted-foreground">
+          <div className="flex flex-col items-center justify-between gap-2 border-t border-border px-4 py-3 text-sm text-muted-foreground sm:flex-row">
             <span>
-              Page {data?.page ?? 1} of {data?.totalPages ?? 1} · {data?.total ?? 0} trades
+              {t("journal.pageOf", { page: data?.page ?? 1, totalPages: data?.totalPages ?? 1 })} ·{" "}
+              {t("journal.tradesCount", { count: data?.total ?? 0 })}
             </span>
             <div className="flex gap-2">
               <Button
@@ -348,7 +360,7 @@ export function JournalPage() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
-                Prev
+                {t("journal.prev")}
               </Button>
               <Button
                 variant="outline"
@@ -356,7 +368,7 @@ export function JournalPage() {
                 disabled={!data || page >= data.totalPages}
                 onClick={() => setPage((p) => p + 1)}
               >
-                Next
+                {t("journal.next")}
                 <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             </div>

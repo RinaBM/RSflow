@@ -1,10 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { PlaceholderPage } from "@/components/ui/placeholder-page";
 
 export function ImportPage() {
-  return (
-    <PlaceholderPage
-      title="Import"
-      description="CSV import with column mapping will be available here."
-    />
-  );
+  const { t } = useTranslation();
+  return <PlaceholderPage title={t("importPage.title")} description={t("importPage.description")} />;
 }

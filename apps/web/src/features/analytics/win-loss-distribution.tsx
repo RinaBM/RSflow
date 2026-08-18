@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { WinLossDistribution } from "@rs-flow/shared";
 import { cn } from "@/lib/utils";
 
@@ -13,23 +14,24 @@ interface Segment {
 }
 
 export function WinLossDistributionCard({ distribution }: { distribution: WinLossDistribution }) {
+  const { t } = useTranslation();
   const total = distribution.winners.count + distribution.losers.count + distribution.breakEven.count;
 
   const segments: Segment[] = [
-    { label: "Winners", count: distribution.winners.count, totalPnl: distribution.winners.totalPnl, className: "bg-profit" },
-    { label: "Losers", count: distribution.losers.count, totalPnl: distribution.losers.totalPnl, className: "bg-loss" },
-    { label: "Breakeven", count: distribution.breakEven.count, className: "bg-muted-foreground" },
+    { label: t("winLoss.winners"), count: distribution.winners.count, totalPnl: distribution.winners.totalPnl, className: "bg-profit" },
+    { label: t("winLoss.losers"), count: distribution.losers.count, totalPnl: distribution.losers.totalPnl, className: "bg-loss" },
+    { label: t("winLoss.breakeven"), count: distribution.breakEven.count, className: "bg-muted-foreground" },
   ];
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
       <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
-        Win / loss distribution
+        {t("winLoss.heading")}
       </h3>
 
       {total === 0 ? (
         <div className="flex h-16 items-center justify-center text-sm text-muted-foreground">
-          No closed trades for the selected filters.
+          {t("winLoss.empty")}
         </div>
       ) : (
         <>

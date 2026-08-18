@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ export function TaxonomyManager<T extends TaxonomyItem>({
   withDescription,
   withColor,
 }: TaxonomyManagerProps<T>) {
+  const { t } = useTranslation();
   const { data, isLoading, isError, error } = hooks.useList();
   const createMutation = hooks.useCreate();
   const updateMutation = hooks.useUpdate();
@@ -60,9 +62,9 @@ export function TaxonomyManager<T extends TaxonomyItem>({
   }
 
   function handleDelete(item: T) {
-    if (!window.confirm(`Delete "${item.name}"?`)) return;
+    if (!window.confirm(t("taxonomy.deleteConfirm", { name: item.name }))) return;
     removeMutation.mutate(item.id, {
-      onError: (err) => window.alert(err instanceof ApiError ? err.message : `Failed to delete ${singularLabel}`),
+      onError: (err) => window.alert(err instanceof ApiError ? err.message : t("taxonomy.deleteFailed")),
     });
   }
 
@@ -85,27 +87,27 @@ export function TaxonomyManager<T extends TaxonomyItem>({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Manage your {title.toLowerCase()}.</p>
+        <p className="text-sm text-muted-foreground">{t("taxonomy.manage", { title: title.toLowerCase() })}</p>
         <Button size="sm" onClick={openCreate}>
           <Plus className="h-4 w-4" />
-          New {singularLabel}
+          {t("taxonomy.newItem", { label: singularLabel })}
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">Loading…</div>
+        <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t("taxonomy.loading")}</div>
       ) : isError ? (
         <div className="flex h-32 items-center justify-center text-sm text-destructive">
-          {error instanceof ApiError ? error.message : `Failed to load ${title.toLowerCase()}`}
+          {error instanceof ApiError ? error.message : t("taxonomy.loadFailed", { title: title.toLowerCase() })}
         </div>
       ) : data?.items.length === 0 ? (
         <EmptyState
           icon={Layers}
-          title={`No ${title.toLowerCase()} yet`}
+          title={t("taxonomy.emptyTitle", { title: title.toLowerCase() })}
           action={
             <Button variant="outline" size="sm" onClick={openCreate}>
               <Plus className="h-4 w-4" />
-              Create your first {singularLabel}
+              {t("taxonomy.createFirst", { label: singularLabel })}
             </Button>
           }
         />
@@ -143,16 +145,18 @@ export function TaxonomyManager<T extends TaxonomyItem>({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? `Edit ${singularLabel}` : `New ${singularLabel}`}</DialogTitle>
+            <DialogTitle>
+              {editing ? t("taxonomy.editItem", { label: singularLabel }) : t("taxonomy.newItem", { label: singularLabel })}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="taxonomy-name">Name</Label>
+              <Label htmlFor="taxonomy-name">{t("taxonomy.name")}</Label>
               <Input id="taxonomy-name" required value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             {withDescription ? (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="taxonomy-description">Description</Label>
+                <Label htmlFor="taxonomy-description">{t("taxonomy.description")}</Label>
                 <Textarea
                   id="taxonomy-description"
                   value={description}
@@ -162,7 +166,7 @@ export function TaxonomyManager<T extends TaxonomyItem>({
             ) : null}
             {withColor ? (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="taxonomy-color">Color</Label>
+                <Label htmlFor="taxonomy-color">{t("taxonomy.color")}</Label>
                 <input
                   id="taxonomy-color"
                   type="color"
@@ -175,16 +179,16 @@ export function TaxonomyManager<T extends TaxonomyItem>({
 
             {mutation.isError ? (
               <p className="text-sm text-destructive">
-                {mutation.error instanceof ApiError ? mutation.error.message : "Failed to save"}
+                {mutation.error instanceof ApiError ? mutation.error.message : t("taxonomy.saveFailed")}
               </p>
             ) : null}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("taxonomy.cancel")}
               </Button>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? "Saving…" : "Save"}
+                {mutation.isPending ? t("trade.saving") : t("taxonomy.save")}
               </Button>
             </DialogFooter>
           </form>

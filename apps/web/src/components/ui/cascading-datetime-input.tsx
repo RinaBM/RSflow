@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface CascadingDateTimeInputProps {
   id: string;
@@ -74,9 +75,18 @@ export function CascadingDateTimeInput({ id, value, onChange, required }: Cascad
   const v = (n: number) => (parsed ? String(n) : "");
 
   return (
-    <div dir="ltr" className="flex flex-wrap items-center gap-1">
-      <Select
+    <>
+      {/* Small screens: native picker -- roomier touch targets than 5 cramped dropdowns. */}
+      <Input
         id={id}
+        type="datetime-local"
+        required={required}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="sm:hidden"
+      />
+      <div dir="ltr" className="hidden flex-wrap items-center gap-1 sm:flex">
+      <Select
         aria-label="Day"
         required={required}
         value={v(current.day)}
@@ -148,6 +158,7 @@ export function CascadingDateTimeInput({ id, value, onChange, required }: Cascad
           </option>
         ))}
       </Select>
-    </div>
+      </div>
+    </>
   );
 }

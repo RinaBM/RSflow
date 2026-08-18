@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import { useLogin, useMe } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api-client";
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const { data, isLoading: meLoading } = useMe();
   const login = useLogin();
   const [email, setEmail] = useState("");
@@ -26,27 +28,29 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in to RS Flow</CardTitle>
-          <CardDescription>Track and analyze your trading performance.</CardDescription>
+          <CardTitle>{t("auth.loginTitle")}</CardTitle>
+          <CardDescription>{t("auth.loginSubtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
                 required
+                dir="ltr"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <Input
                 id="password"
                 type="password"
                 required
+                dir="ltr"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -54,19 +58,19 @@ export function LoginPage() {
 
             {login.isError ? (
               <p className="text-sm text-destructive">
-                {login.error instanceof ApiError ? login.error.message : "Login failed"}
+                {login.error instanceof ApiError ? login.error.message : t("auth.loginFailed")}
               </p>
             ) : null}
 
             <Button type="submit" disabled={login.isPending}>
-              {login.isPending ? "Signing in…" : "Sign in"}
+              {login.isPending ? t("auth.signingIn") : t("auth.signIn")}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            {t("auth.noAccount")}{" "}
             <Link to="/register" className="text-primary hover:underline">
-              Register
+              {t("auth.registerLink")}
             </Link>
           </p>
         </CardContent>

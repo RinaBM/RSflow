@@ -1,4 +1,8 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
+// Defaults to whatever host served this page (not a hardcoded "localhost") so the API call stays
+// same-site as the page — e.g. on a LAN IP, both page and API are under that IP, keeping
+// SameSite=Lax cookies valid. A hardcoded cross-host default would silently break login whenever
+// the page and API host don't match.
+const API_URL = import.meta.env.VITE_API_URL ?? `${window.location.protocol}//${window.location.hostname}:4000/api`;
 
 export class ApiError extends Error {
   readonly status: number;

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ function formatDateTime(iso: string | null) {
 }
 
 export function TradeReviewPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const tradeId = id as string;
 
@@ -112,24 +114,24 @@ export function TradeReviewPage() {
           setAttachmentUrl("");
           setAttachmentCaption("");
         },
-        onError: (err) => window.alert(err instanceof ApiError ? err.message : "Failed to add attachment"),
+        onError: (err) => window.alert(err instanceof ApiError ? err.message : t("tradeReview.addFailed")),
       },
     );
   }
 
   function handleDeleteAttachment(attachmentId: string) {
-    if (!window.confirm("Remove this attachment?")) return;
+    if (!window.confirm(t("tradeReview.removeConfirm"))) return;
     deleteAttachment.mutate(attachmentId);
   }
 
   if (isLoading) {
-    return <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">Loading trade…</div>;
+    return <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">{t("tradeReview.loading")}</div>;
   }
 
   if (isError || !trade) {
     return (
       <div className="flex h-40 items-center justify-center text-sm text-destructive">
-        {error instanceof ApiError ? error.message : "Trade not found"}
+        {error instanceof ApiError ? error.message : t("tradeReview.notFound")}
       </div>
     );
   }
@@ -139,32 +141,32 @@ export function TradeReviewPage() {
       <div>
         <Link to="/journal" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Journal
+          {t("tradeReview.backToJournal")}
         </Link>
         <div className="mt-2 flex items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">
             {trade.symbol} · {trade.side}
           </h1>
-          <span className={cn("text-lg font-semibold", (trade.netPnl ?? 0) >= 0 ? "text-profit" : "text-loss")}>
+          <span dir="ltr" className={cn("text-lg font-semibold", (trade.netPnl ?? 0) >= 0 ? "text-profit" : "text-loss")}>
             {formatCurrency(trade.netPnl)}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground" dir="ltr">
           {formatDateTime(trade.entryTime)} → {formatDateTime(trade.exitTime)}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Review</CardTitle>
+          <CardTitle>{t("tradeReview.review")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveReview} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="review-strategy">Strategy</Label>
+                <Label htmlFor="review-strategy">{t("tradeReview.strategy")}</Label>
                 <Select id="review-strategy" value={strategyId} onChange={(e) => setStrategyId(e.target.value)}>
-                  <option value="">None</option>
+                  <option value="">{t("tradeReview.none")}</option>
                   {strategies?.items.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -173,9 +175,9 @@ export function TradeReviewPage() {
                 </Select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="review-setup">Setup</Label>
+                <Label htmlFor="review-setup">{t("tradeReview.setup")}</Label>
                 <Select id="review-setup" value={setupId} onChange={(e) => setSetupId(e.target.value)}>
-                  <option value="">None</option>
+                  <option value="">{t("tradeReview.none")}</option>
                   {setups?.items.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -186,7 +188,7 @@ export function TradeReviewPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label>Tags</Label>
+              <Label>{t("tradeReview.tags")}</Label>
               <div className="flex flex-wrap gap-2">
                 {tags?.items.length ? (
                   tags.items.map((tag) => (
@@ -205,43 +207,41 @@ export function TradeReviewPage() {
                     </button>
                   ))
                 ) : (
-                  <span className="text-sm text-muted-foreground">
-                    No tags yet — create some in Strategies → Tags.
-                  </span>
+                  <span className="text-sm text-muted-foreground">{t("tradeReview.noTagsYet")}</span>
                 )}
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-entry-reason">Why did I enter this trade?</Label>
+              <Label htmlFor="review-entry-reason">{t("tradeReview.whyEnter")}</Label>
               <Textarea id="review-entry-reason" value={entryReason} onChange={(e) => setEntryReason(e.target.value)} />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-trading-plan">Trading plan</Label>
+              <Label htmlFor="review-trading-plan">{t("tradeReview.tradingPlan")}</Label>
               <Textarea id="review-trading-plan" value={tradingPlan} onChange={(e) => setTradingPlan(e.target.value)} />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-followed-plan">Did I follow the plan?</Label>
+              <Label htmlFor="review-followed-plan">{t("tradeReview.followedPlan")}</Label>
               <Select
                 id="review-followed-plan"
                 value={followedPlan}
                 onChange={(e) => setFollowedPlan(e.target.value as "" | "yes" | "no")}
               >
-                <option value="">Not specified</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
+                <option value="">{t("tradeReview.notSpecified")}</option>
+                <option value="yes">{t("tradeReview.yes")}</option>
+                <option value="no">{t("tradeReview.no")}</option>
               </Select>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-what-went-well">What did I do right?</Label>
+              <Label htmlFor="review-what-went-well">{t("tradeReview.whatWentWell")}</Label>
               <Textarea id="review-what-went-well" value={whatWentWell} onChange={(e) => setWhatWentWell(e.target.value)} />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label>Mistakes</Label>
+              <Label>{t("tradeReview.mistakes")}</Label>
               <div className="flex flex-wrap gap-2">
                 {mistakeCategories?.items.length ? (
                   mistakeCategories.items.map((mistake) => (
@@ -260,47 +260,45 @@ export function TradeReviewPage() {
                     </button>
                   ))
                 ) : (
-                  <span className="text-sm text-muted-foreground">
-                    No mistake categories yet — create some in Strategies → Mistakes.
-                  </span>
+                  <span className="text-sm text-muted-foreground">{t("tradeReview.noMistakesYet")}</span>
                 )}
               </div>
               <Textarea
-                placeholder="Additional notes about mistakes made…"
+                placeholder={t("tradeReview.mistakesNotesPlaceholder")}
                 value={mistakesNotes}
                 onChange={(e) => setMistakesNotes(e.target.value)}
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-lessons">Lessons learned</Label>
+              <Label htmlFor="review-lessons">{t("tradeReview.lessonsLearned")}</Label>
               <Textarea id="review-lessons" value={lessonsLearned} onChange={(e) => setLessonsLearned(e.target.value)} />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-emotional-state">Emotional state</Label>
+              <Label htmlFor="review-emotional-state">{t("tradeReview.emotionalState")}</Label>
               <Input
                 id="review-emotional-state"
                 value={emotionalState}
                 onChange={(e) => setEmotionalState(e.target.value)}
-                placeholder="e.g. Calm, FOMO, Confident…"
+                placeholder={t("tradeReview.emotionalStatePlaceholder")}
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="review-notes">Notes</Label>
+              <Label htmlFor="review-notes">{t("tradeReview.notes")}</Label>
               <Textarea id="review-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
 
             {updateTrade.isError ? (
               <p className="text-sm text-destructive">
-                {updateTrade.error instanceof ApiError ? updateTrade.error.message : "Failed to save review"}
+                {updateTrade.error instanceof ApiError ? updateTrade.error.message : t("tradeReview.saveFailed")}
               </p>
             ) : null}
 
             <div>
               <Button type="submit" disabled={updateTrade.isPending}>
-                {updateTrade.isPending ? "Saving…" : "Save review"}
+                {updateTrade.isPending ? t("tradeReview.saving") : t("tradeReview.saveReview")}
               </Button>
             </div>
           </form>
@@ -309,11 +307,11 @@ export function TradeReviewPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Screenshots</CardTitle>
+          <CardTitle>{t("tradeReview.screenshots")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {trade.attachments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No screenshots added yet.</p>
+            <p className="text-sm text-muted-foreground">{t("tradeReview.noScreenshots")}</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {trade.attachments.map((attachment) => (
@@ -342,29 +340,30 @@ export function TradeReviewPage() {
 
           <form onSubmit={handleAddAttachment} className="flex flex-wrap items-end gap-3">
             <div className="flex min-w-48 flex-1 flex-col gap-1.5">
-              <Label htmlFor="attachment-url">Screenshot URL</Label>
+              <Label htmlFor="attachment-url">{t("tradeReview.screenshotUrl")}</Label>
               <Input
                 id="attachment-url"
                 type="url"
                 required
+                dir="ltr"
                 value={attachmentUrl}
                 onChange={(e) => setAttachmentUrl(e.target.value)}
                 placeholder="https://…"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="attachment-type">Type</Label>
+              <Label htmlFor="attachment-type">{t("tradeReview.type")}</Label>
               <Select
                 id="attachment-type"
                 value={attachmentType}
                 onChange={(e) => setAttachmentType(e.target.value as "BEFORE" | "AFTER")}
               >
-                <option value="BEFORE">Before</option>
-                <option value="AFTER">After</option>
+                <option value="BEFORE">{t("tradeReview.before")}</option>
+                <option value="AFTER">{t("tradeReview.after")}</option>
               </Select>
             </div>
             <div className="flex min-w-40 flex-col gap-1.5">
-              <Label htmlFor="attachment-caption">Caption</Label>
+              <Label htmlFor="attachment-caption">{t("tradeReview.caption")}</Label>
               <Input
                 id="attachment-caption"
                 value={attachmentCaption}
@@ -373,7 +372,7 @@ export function TradeReviewPage() {
             </div>
             <Button type="submit" disabled={addAttachment.isPending}>
               <Plus className="h-4 w-4" />
-              Add
+              {t("tradeReview.add")}
             </Button>
           </form>
         </CardContent>

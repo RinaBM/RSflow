@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   BarChart3,
@@ -7,11 +8,13 @@ import {
   LayoutDashboard,
   Layers,
   LogOut,
+  Menu,
   Settings,
   Sprout,
   Upload,
   User,
   Wallet,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLogout, useMe } from "@/features/auth/hooks";
@@ -40,10 +43,10 @@ const NAV_GROUPS = [
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
   return cn(
-    "flex items-center gap-3 rounded-md border-s-2 px-3 py-2 text-sm font-medium transition-colors",
+    "flex items-center gap-3 rounded-md border-s-2 px-3 py-2 text-sm transition-colors",
     isActive
-      ? "border-primary bg-accent text-foreground"
-      : "border-transparent text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+      ? "border-primary bg-accent font-bold text-foreground"
+      : "border-transparent font-medium text-muted-foreground hover:bg-accent/60 hover:text-foreground",
   );
 }
 
@@ -56,10 +59,47 @@ export function AppLayout() {
   const { data } = useMe();
   const logout = useLogout();
   const { t } = useTranslation();
+  const location = useLocation();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <aside className="flex w-60 shrink-0 flex-col border-e border-border bg-card">
+      <div className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
+        <button
+          type="button"
+          aria-label="Open navigation"
+          onClick={() => setMobileNavOpen(true)}
+          className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-xs font-bold text-primary-foreground">
+            R
+          </span>
+          <span className="text-sm font-semibold tracking-wide">RS FLOW</span>
+        </div>
+        <LanguageToggle />
+      </div>
+
+      {mobileNavOpen ? (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden
+        />
+      ) : null}
+
+      <aside
+        className={cn(
+          "fixed inset-y-0 start-0 z-50 flex w-64 shrink-0 flex-col border-e border-border bg-card transition-transform duration-200 lg:static lg:w-60 lg:translate-x-0",
+          mobileNavOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full",
+        )}
+      >
         <div className="flex h-14 items-center justify-between gap-2 border-b border-border px-4">
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-xs font-bold text-primary-foreground">
@@ -67,7 +107,16 @@ export function AppLayout() {
             </span>
             <span className="text-sm font-semibold tracking-wide">RS FLOW</span>
           </div>
-          <LanguageToggle />
+          <div className="flex items-center gap-1">
+            <LanguageToggle />
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(false)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground lg:hidden"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
@@ -119,7 +168,7 @@ export function AppLayout() {
         ) : null}
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pt-20 sm:p-8 lg:pt-8">
         <Outlet />
       </main>
     </div>

@@ -23,6 +23,10 @@ function summarizeByPeriod(closed: ClosedTrade[], periodKeyOf: (trade: ClosedTra
   return [...byPeriod.values()].sort((a, b) => a.period.localeCompare(b.period));
 }
 
+function dayKey(date: Date): string {
+  return date.toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
+}
+
 function monthKey(date: Date): string {
   return date.toISOString().slice(0, 7); // YYYY-MM (UTC)
 }
@@ -40,6 +44,10 @@ function isoWeekKey(date: Date): string {
 
   const weekNum = 1 + Math.round((d.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000));
   return `${d.getUTCFullYear()}-W${String(weekNum).padStart(2, "0")}`;
+}
+
+export function summarizeByDay(trades: AnalyticsTrade[]): PeriodSummary[] {
+  return summarizeByPeriod(trades.filter(isClosed), (t) => dayKey(t.exitTime));
 }
 
 export function summarizeByWeek(trades: AnalyticsTrade[]): PeriodSummary[] {

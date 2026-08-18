@@ -33,6 +33,8 @@ export function AnalyticsPage() {
         <>
           <WinLossDistributionCard distribution={data.winLossDistribution} />
 
+          <PeriodPnlChart title="Daily P&L" data={data.daily} />
+
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <PeriodPnlChart title="Weekly P&L" data={data.weekly} />
             <PeriodPnlChart title="Monthly P&L" data={data.monthly} />

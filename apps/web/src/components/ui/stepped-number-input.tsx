@@ -34,12 +34,15 @@ export function SteppedNumberInput({
   }
 
   return (
-    <div className="flex h-9 items-stretch rounded-md border border-input bg-background transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring">
+    <div
+      dir="ltr"
+      className="flex h-9 items-stretch rounded-md border border-input bg-background transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring"
+    >
       <input
         id={id}
         type="number"
         inputMode="decimal"
-        step={smallStep}
+        step="any"
         min={min}
         required={required}
         value={value}

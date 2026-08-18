@@ -122,6 +122,7 @@ export const analyticsBreakdownsSchema = z.object({
   bySide: z.array(groupPerformanceSchema),
   byHour: z.array(groupPerformanceSchema),
   byDayOfWeek: z.array(groupPerformanceSchema),
+  daily: z.array(periodSummarySchema),
   weekly: z.array(periodSummarySchema),
   monthly: z.array(periodSummarySchema),
   winLossDistribution: winLossDistributionSchema,

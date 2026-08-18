@@ -11,7 +11,7 @@ import {
   performanceByStrategy,
   performanceBySymbol,
 } from "./grouping.js";
-import { summarizeByMonth, summarizeByWeek } from "./time-buckets.js";
+import { summarizeByDay, summarizeByMonth, summarizeByWeek } from "./time-buckets.js";
 
 const tradeProjection = {
   id: true,
@@ -104,6 +104,7 @@ export async function getAnalyticsBreakdowns(userId: string, filters: AnalyticsF
     bySide: performanceBySide(analyticsTrades),
     byHour: performanceByHour(analyticsTrades),
     byDayOfWeek: performanceByDayOfWeek(analyticsTrades),
+    daily: summarizeByDay(analyticsTrades),
     weekly: summarizeByWeek(analyticsTrades),
     monthly: summarizeByMonth(analyticsTrades),
     winLossDistribution: computeWinLossDistribution(analyticsTrades),

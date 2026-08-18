@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { summarizeByMonth, summarizeByWeek } from "./time-buckets.js";
+import { summarizeByDay, summarizeByMonth, summarizeByWeek } from "./time-buckets.js";
 import type { AnalyticsTrade } from "./metrics.js";
 
 function trade(overrides: Partial<AnalyticsTrade> & { id: string }): AnalyticsTrade {
@@ -17,6 +17,24 @@ function trade(overrides: Partial<AnalyticsTrade> & { id: string }): AnalyticsTr
     ...overrides,
   };
 }
+
+describe("summarizeByDay", () => {
+  it("aggregates net P&L and trade count per calendar day (UTC), sorted chronologically", () => {
+    const trades: AnalyticsTrade[] = [
+      trade({ id: "1", exitTime: new Date("2026-01-06T15:00:00Z"), netPnl: 50 }),
+      trade({ id: "2", exitTime: new Date("2026-01-05T09:00:00Z"), netPnl: 30 }),
+      trade({ id: "3", exitTime: new Date("2026-01-05T20:00:00Z"), netPnl: -10 }),
+      trade({ id: "4", status: "OPEN", exitTime: null, netPnl: null }),
+    ];
+
+    const result = summarizeByDay(trades);
+
+    expect(result).toEqual([
+      { period: "2026-01-05", netPnl: 20, tradeCount: 2 },
+      { period: "2026-01-06", netPnl: 50, tradeCount: 1 },
+    ]);
+  });
+});
 
 describe("summarizeByMonth", () => {
   it("aggregates net P&L and trade count per calendar month, sorted chronologically", () => {

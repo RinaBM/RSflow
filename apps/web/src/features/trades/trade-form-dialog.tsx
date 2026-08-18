@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { computeTradePnl } from "@rs-flow/shared";
 import type { Trade } from "@rs-flow/shared";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { SteppedNumberInput } from "@/components/ui/stepped-number-input";
+import { CascadingDateTimeInput } from "@/components/ui/cascading-datetime-input";
 import {
   Dialog,
   DialogContent,
@@ -38,8 +40,8 @@ function toDateOrUndefined(localValue: string) {
   return localValue ? new Date(localValue) : undefined;
 }
 
-function describeError(error: unknown): string {
-  if (!(error instanceof ApiError)) return "Failed to save trade";
+function describeError(error: unknown, fallback: string): string {
+  if (!(error instanceof ApiError)) return fallback;
   const details = error.details as { formErrors?: string[]; fieldErrors?: Record<string, string[]> } | undefined;
   const messages = [
     ...(details?.formErrors ?? []),
@@ -62,6 +64,7 @@ interface QuickAddSelectProps {
 }
 
 function QuickAddSelect({ id, label, value, onValueChange, items, onCreate, creating, placeholder }: QuickAddSelectProps) {
+  const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -83,7 +86,7 @@ function QuickAddSelect({ id, label, value, onValueChange, items, onCreate, crea
           onClick={() => setAdding((a) => !a)}
           className="text-xs font-medium text-primary hover:underline"
         >
-          {adding ? "Cancel" : "+ New"}
+          {adding ? t("trade.cancelAdd") : t("trade.addNew")}
         </button>
       </div>
       {adding ? (
@@ -101,12 +104,12 @@ function QuickAddSelect({ id, label, value, onValueChange, items, onCreate, crea
             }}
           />
           <Button type="button" size="sm" disabled={!draft.trim() || creating} onClick={() => void handleCreate()}>
-            Add
+            {t("trade.add")}
           </Button>
         </div>
       ) : (
         <Select id={id} value={value} onChange={(e) => onValueChange(e.target.value)}>
-          <option value="">None</option>
+          <option value="">{t("trade.none")}</option>
           {items?.map((item) => (
             <option key={item.id} value={item.id}>
               {item.name}
@@ -119,6 +122,7 @@ function QuickAddSelect({ id, label, value, onValueChange, items, onCreate, crea
 }
 
 export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(trade);
   const { data: accountsData } = useTradingAccounts();
   const create = useCreateTrade();
@@ -252,21 +256,20 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit trade" : "New trade"}</DialogTitle>
-          <DialogDescription>
-            Only symbol, side, entry time, entry price and quantity are required — everything else is optional.
-          </DialogDescription>
+          <DialogTitle>{isEdit ? t("trade.editTitle") : t("trade.newTitle")}</DialogTitle>
+          <DialogDescription>{t("trade.description")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex max-h-[75vh] flex-col gap-5 overflow-y-auto pr-1">
           <div className="flex gap-3">
             <div className="flex flex-1 flex-col gap-1.5">
-              <Label htmlFor="trade-symbol">Symbol</Label>
+              <Label htmlFor="trade-symbol">{t("trade.symbol")}</Label>
               <Input
                 id="trade-symbol"
                 autoFocus
                 required
                 list="trade-symbol-suggestions"
+                dir="ltr"
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                 placeholder="AAPL"
@@ -278,7 +281,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
               </datalist>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Side</Label>
+              <Label>{t("trade.side")}</Label>
               <div className="flex overflow-hidden rounded-md border border-input">
                 <button
                   type="button"
@@ -288,7 +291,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
                     side === "LONG" ? "bg-profit text-profit-foreground" : "bg-background text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  Long
+                  {t("trade.long")}
                 </button>
                 <button
                   type="button"
@@ -298,58 +301,47 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
                     side === "SHORT" ? "bg-loss text-loss-foreground" : "bg-background text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  Short
+                  {t("trade.short")}
                 </button>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="trade-entry-time">Entry date &amp; time</Label>
+                  <Label htmlFor="trade-entry-time">{t("trade.entryDateTime")}</Label>
                   <button
                     type="button"
                     onClick={() => setEntryTime(toDatetimeLocalValue(new Date().toISOString()))}
                     className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                   >
                     <Clock className="h-3 w-3" />
-                    Now
+                    {t("trade.now")}
                   </button>
                 </div>
-                <Input
-                  id="trade-entry-time"
-                  type="datetime-local"
-                  required
-                  value={entryTime}
-                  onChange={(e) => setEntryTime(e.target.value)}
-                />
+                <CascadingDateTimeInput id="trade-entry-time" required value={entryTime} onChange={setEntryTime} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="trade-exit-time">Exit date &amp; time</Label>
+                  <Label htmlFor="trade-exit-time">{t("trade.exitDateTime")}</Label>
                   <button
                     type="button"
                     onClick={() => setExitTime(toDatetimeLocalValue(new Date().toISOString()))}
                     className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                   >
                     <Clock className="h-3 w-3" />
-                    Now
+                    {t("trade.now")}
                   </button>
                 </div>
-                <Input
-                  id="trade-exit-time"
-                  type="datetime-local"
-                  value={exitTime}
-                  onChange={(e) => setExitTime(e.target.value)}
-                />
+                <CascadingDateTimeInput id="trade-exit-time" value={exitTime} onChange={setExitTime} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="trade-entry-price">Entry price</Label>
+                <Label htmlFor="trade-entry-price">{t("trade.entryPrice")}</Label>
                 <SteppedNumberInput
                   id="trade-entry-price"
                   value={entryPrice}
@@ -362,7 +354,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="trade-exit-price">Exit price</Label>
+                <Label htmlFor="trade-exit-price">{t("trade.exitPrice")}</Label>
                 <SteppedNumberInput
                   id="trade-exit-price"
                   value={exitPrice}
@@ -377,7 +369,7 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="trade-quantity">Quantity</Label>
+                <Label htmlFor="trade-quantity">{t("trade.quantity")}</Label>
                 <SteppedNumberInput
                   id="trade-quantity"
                   value={quantity}
@@ -390,12 +382,13 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="trade-fees">Commission / fees</Label>
+                <Label htmlFor="trade-fees">{t("trade.fees")}</Label>
                 <Input
                   id="trade-fees"
                   type="number"
                   step="0.01"
                   min="0"
+                  dir="ltr"
                   value={fees}
                   onChange={(e) => setFees(e.target.value)}
                 />
@@ -406,46 +399,48 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
           {preview ? (
             <div className="grid grid-cols-4 gap-3 rounded-lg border border-border bg-muted/30 p-3 text-center">
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Gross P&amp;L</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("trade.grossPnl")}</div>
                 <div
                   key={preview.grossPnl}
+                  dir="ltr"
                   className={cn("value-pop font-mono text-sm font-semibold", preview.grossPnl == null ? "" : preview.grossPnl >= 0 ? "text-profit" : "text-loss")}
                 >
                   {formatCurrency(preview.grossPnl)}
                 </div>
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Net P&amp;L</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("trade.netPnl")}</div>
                 <div
                   key={preview.netPnl}
+                  dir="ltr"
                   className={cn("value-pop font-mono text-sm font-semibold", preview.netPnl == null ? "" : preview.netPnl >= 0 ? "text-profit" : "text-loss")}
                 >
                   {formatCurrency(preview.netPnl)}
                 </div>
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Return</div>
-                <div key={preview.returnPct} className="value-pop font-mono text-sm font-semibold">
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("trade.returnLabel")}</div>
+                <div key={preview.returnPct} dir="ltr" className="value-pop font-mono text-sm font-semibold">
                   {formatPercent(preview.returnPct)}
                 </div>
               </div>
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Holding time</div>
-                <div key={preview.holdingMinutes} className="value-pop font-mono text-sm font-semibold">
-                  {preview.grossPnl == null ? "Open" : formatHoldingTime(preview.holdingMinutes)}
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("trade.holdingTime")}</div>
+                <div key={preview.holdingMinutes} dir="ltr" className="value-pop font-mono text-sm font-semibold">
+                  {preview.grossPnl == null ? t("trade.open") : formatHoldingTime(preview.holdingMinutes)}
                 </div>
               </div>
             </div>
           ) : null}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="trade-account">Trading account (optional)</Label>
+            <Label htmlFor="trade-account">{t("trade.account")}</Label>
             <Select
               id="trade-account"
               value={tradingAccountId}
               onChange={(e) => setTradingAccountId(e.target.value)}
             >
-              <option value="">No account</option>
+              <option value="">{t("trade.noAccount")}</option>
               {accountsData?.items.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name}
@@ -457,29 +452,29 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
           <div className="grid grid-cols-2 gap-4">
             <QuickAddSelect
               id="trade-strategy"
-              label="Strategy"
+              label={t("trade.strategy")}
               value={strategyId}
               onValueChange={setStrategyId}
               items={strategies?.items}
               onCreate={(name) => createStrategy.mutateAsync({ name })}
               creating={createStrategy.isPending}
-              placeholder="e.g. Breakout"
+              placeholder={t("trade.strategyPlaceholder")}
             />
             <QuickAddSelect
               id="trade-setup"
-              label="Setup"
+              label={t("trade.setup")}
               value={setupId}
               onValueChange={setSetupId}
               items={setups?.items}
               onCreate={(name) => createSetup.mutateAsync({ name })}
               creating={createSetup.isPending}
-              placeholder="e.g. Pullback to VWAP"
+              placeholder={t("trade.setupPlaceholder")}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <Label>Tags</Label>
+              <Label>{t("trade.tags")}</Label>
               <QuickAddTagButton onCreate={(name) => createTag.mutateAsync({ name })} creating={createTag.isPending} onCreated={(id) => setTagIds((prev) => [...prev, id])} />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -511,26 +506,26 @@ export function TradeFormDialog({ open, onOpenChange, trade }: TradeFormDialogPr
                   );
                 })
               ) : (
-                <span className="text-sm text-muted-foreground">No tags yet.</span>
+                <span className="text-sm text-muted-foreground">{t("trade.noTags")}</span>
               )}
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="trade-notes">Notes</Label>
+            <Label htmlFor="trade-notes">{t("trade.notes")}</Label>
             <Textarea id="trade-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
 
           {mutation.isError ? (
-            <p className="text-sm text-destructive">{describeError(mutation.error)}</p>
+            <p className="text-sm text-destructive">{describeError(mutation.error, t("trade.saveFailed"))}</p>
           ) : null}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("trade.cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Saving…" : "Save trade"}
+              {mutation.isPending ? t("trade.saving") : t("trade.save")}
             </Button>
           </DialogFooter>
         </form>
@@ -548,6 +543,7 @@ function QuickAddTagButton({
   onCreated: (id: string) => void;
   creating: boolean;
 }) {
+  const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -567,7 +563,7 @@ function QuickAddTagButton({
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="New tag"
+          placeholder={t("trade.tagPlaceholder")}
           className="h-7 w-28 text-xs"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -578,7 +574,7 @@ function QuickAddTagButton({
           }}
         />
         <Button type="button" size="sm" className="h-7 px-2 text-xs" disabled={!draft.trim() || creating} onClick={() => void handleCreate()}>
-          Add
+          {t("trade.add")}
         </Button>
       </div>
     );
@@ -586,7 +582,7 @@ function QuickAddTagButton({
 
   return (
     <button type="button" onClick={() => setAdding(true)} className="text-xs font-medium text-primary hover:underline">
-      + New
+      {t("trade.addNew")}
     </button>
   );
 }

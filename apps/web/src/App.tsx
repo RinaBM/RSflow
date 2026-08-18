@@ -11,6 +11,7 @@ import { TradeReviewPage } from "@/pages/trade-review-page";
 import { CalendarPage } from "@/pages/calendar-page";
 import { AnalyticsPage } from "@/pages/analytics-page";
 import { StrategiesPage } from "@/pages/strategies-page";
+import { GrowthPage } from "@/pages/growth-page";
 import { ImportPage } from "@/pages/import-page";
 import { TradingAccountsPage } from "@/pages/trading-accounts-page";
 import { SettingsPage } from "@/pages/settings-page";
@@ -32,6 +33,7 @@ export default function App() {
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/strategies" element={<StrategiesPage />} />
+              <Route path="/growth" element={<GrowthPage />} />
               <Route path="/import" element={<ImportPage />} />
               <Route path="/trading-accounts" element={<TradingAccountsPage />} />
               <Route path="/settings" element={<SettingsPage />} />

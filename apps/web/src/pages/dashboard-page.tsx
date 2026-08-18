@@ -1,13 +1,20 @@
-import { LineChart } from "lucide-react";
+import { useMemo } from "react";
+import { LineChart, Moon, Sun, Sunrise } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { StatTile } from "@/components/ui/stat-tile";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ApiError } from "@/lib/api-client";
 import { formatCurrency, formatHoldingTime, formatPercent } from "@/lib/format";
+import { getTimeOfDay, firstName } from "@/lib/greeting";
+import { pickMotivation } from "@/lib/motivation";
+import { useMe } from "@/features/auth/hooks";
 import { useAnalyticsFilterValues } from "@/store/analytics-filters-store";
 import { useDashboardMetrics } from "@/features/analytics/hooks";
 import { EquityCurveChart } from "@/features/analytics/equity-curve-chart";
 import { AnalyticsFilterBar } from "@/features/analytics/analytics-filter-bar";
+import { RecentTradesCard } from "@/features/trades/recent-trades-card";
+
+const TIME_ICONS = { morning: Sunrise, afternoon: Sun, evening: Moon };
 
 function formatRatio(value: number | null) {
   if (value == null) return "—";
@@ -25,6 +32,35 @@ function formatTradeRef(value: { symbol: string; netPnl: number } | null) {
   return `${value.symbol} (${formatCurrency(value.netPnl)})`;
 }
 
+function GreetingBanner({ hasTrades, netPnl }: { hasTrades: boolean; netPnl: number | null }) {
+  const { t } = useTranslation();
+  const { data: me } = useMe();
+  const timeOfDay = useMemo(() => getTimeOfDay(), []);
+  const tone = netPnl != null && netPnl >= 0 ? "positive" : "negative";
+  const pool = t(`dashboard.motivation.${tone}`, { returnObjects: true }) as string[];
+  const name = me?.user ? firstName(me.user.name) : "";
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally re-picks only when the tone (win/loss) flips, not on every render
+  const message = useMemo(() => (hasTrades && name ? pickMotivation(pool, name) : ""), [tone, hasTrades, name]);
+
+  if (!me?.user) return null;
+  const greeting = t(`dashboard.greeting.${timeOfDay}`);
+  const Icon = TIME_ICONS[timeOfDay];
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+        <Icon className="h-4 w-4" />
+      </span>
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-foreground">
+          {greeting}, {name}!
+        </div>
+        {message ? <div className="text-sm text-muted-foreground">{message}</div> : null}
+      </div>
+    </div>
+  );
+}
+
 export function DashboardPage() {
   const { t } = useTranslation();
   const filters = useAnalyticsFilterValues();
@@ -36,6 +72,8 @@ export function DashboardPage() {
         <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard.title")}</h1>
         <p className="text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
       </div>
+
+      <GreetingBanner hasTrades={Boolean(metrics && metrics.totalTrades > 0)} netPnl={metrics?.netPnl ?? null} />
 
       <AnalyticsFilterBar />
 
@@ -68,6 +106,8 @@ export function DashboardPage() {
               sublabel={t("dashboard.stats.openSuffix", { count: metrics.openTrades })}
             />
           </div>
+
+          <RecentTradesCard />
 
           <div>
             <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">

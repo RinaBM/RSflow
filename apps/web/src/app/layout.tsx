@@ -8,6 +8,7 @@ import {
   Layers,
   LogOut,
   Settings,
+  Sprout,
   Upload,
   User,
   Wallet,
@@ -25,6 +26,7 @@ const NAV_GROUPS = [
       { to: "/calendar", key: "calendar" as const, icon: CalendarDays, end: false },
       { to: "/analytics", key: "analytics" as const, icon: BarChart3, end: false },
       { to: "/strategies", key: "strategies" as const, icon: Layers, end: false },
+      { to: "/growth", key: "growth" as const, icon: Sprout, end: false },
     ],
   },
   {

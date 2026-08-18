@@ -7,6 +7,7 @@ export interface Translations {
       calendar: string;
       analytics: string;
       strategies: string;
+      growth: string;
       import: string;
       tradingAccounts: string;
       settings: string;
@@ -60,6 +61,27 @@ export interface Translations {
       maxConsecutiveWins: string;
       maxConsecutiveLosses: string;
     };
+    greeting: {
+      morning: string;
+      afternoon: string;
+      evening: string;
+    };
+    motivation: {
+      positive: string[];
+      negative: string[];
+    };
+    recentTrades: string;
+    noRecentTrades: string;
+  };
+  growth: {
+    title: string;
+    subtitle: string;
+    quotesHeading: string;
+    notesHeading: string;
+    notesEmpty: string;
+    notesPlaceholder: string;
+    save: string;
+    saved: string;
   };
   trade: {
     newTitle: string;
@@ -119,6 +141,7 @@ export const en: Translations = {
       calendar: "Calendar",
       analytics: "Analytics",
       strategies: "Strategies",
+      growth: "Growth",
       import: "Import",
       tradingAccounts: "Trading Accounts",
       settings: "Settings",
@@ -172,6 +195,49 @@ export const en: Translations = {
       maxConsecutiveWins: "Max consecutive wins",
       maxConsecutiveLosses: "Max consecutive losses",
     },
+    greeting: {
+      morning: "Good morning",
+      afternoon: "Cheerful afternoon",
+      evening: "Serene evening",
+    },
+    motivation: {
+      positive: [
+        "{{name}}, Warren Buffett is calling — he wants tips from you.",
+        "Elon just saw your P&L and postponed his next tweet.",
+        "{{name}}, Ray Dalio sent a like. Seriously.",
+        "Looks like you're actually getting good at stop-losses, {{name}}.",
+        "{{name}} Stocks is proud of you.",
+        "Wall Street is talking about you this morning, {{name}}.",
+        "Even Jordan Belfort would tip his hat, {{name}} — minus the felonies, obviously.",
+        "Good morning to {{name}}'s winning portfolio.",
+        "Jeff Bezos is considering asking you for investment advice, {{name}}.",
+        "{{name}}, you're not a trader — you're a force of nature.",
+        "Mark Cuban would be proud, {{name}}. He'd actually call you.",
+        "Nice one, {{name}}! Even Buffett doesn't nail it like that every time.",
+      ],
+      negative: [
+        "{{name}}, even Warren Buffett lost money before he learned to win. Keep going.",
+        "Every great trader has days like this, {{name}}. It's part of the process.",
+        "{{name}}, even Elon flopped a few times before SpaceX landed. Don't quit.",
+        "A loss is just a lesson you haven't finished learning yet, {{name}}.",
+        "{{name}}, Ray Dalio wrote a whole book about his failures. You're on the right track.",
+        "Tomorrow's a new day in the market, {{name}}. Onward.",
+        "Statistically speaking, {{name}}, this is exactly where comebacks start.",
+        "It'll be alright, {{name}}. Even Jesse Livermore fell and got back up more than once.",
+      ],
+    },
+    recentTrades: "Recent trades",
+    noRecentTrades: "No trades yet.",
+  },
+  growth: {
+    title: "Growth",
+    subtitle: "Notes to keep, lessons to remember — and a little motivation along the way.",
+    quotesHeading: "Words from the greats",
+    notesHeading: "Trade notes",
+    notesEmpty: "No trades yet — once you log some, you can jot improvement notes here.",
+    notesPlaceholder: "What would you keep doing? What would you change next time?",
+    save: "Save",
+    saved: "Saved",
   },
   trade: {
     newTitle: "New trade",

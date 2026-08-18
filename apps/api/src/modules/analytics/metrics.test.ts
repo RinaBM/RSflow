@@ -21,6 +21,10 @@ function trade(overrides: Partial<AnalyticsTrade> & { id: string }): AnalyticsTr
     entryTime: new Date("2026-01-01T14:00:00Z"),
     exitTime: new Date("2026-01-01T15:00:00Z"),
     netPnl: 0,
+    strategyId: null,
+    strategyName: null,
+    setupId: null,
+    setupName: null,
     ...overrides,
   };
 }

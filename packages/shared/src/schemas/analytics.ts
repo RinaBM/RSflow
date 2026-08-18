@@ -72,3 +72,58 @@ export const calendarSummarySchema = z.object({
   monthlyTradeCount: z.number(),
 });
 export type CalendarSummary = z.infer<typeof calendarSummarySchema>;
+
+// Shared by the dashboard and the analytics breakdowns endpoint. dateFrom/dateTo filter on
+// exitTime (when P&L realizes), not entryTime — a distinct, deliberately separate concept from
+// the Journal's entryTime-based dateFrom/dateTo in tradeListQuerySchema.
+const tagIdsQueryValue = z.union([z.string(), z.array(z.string())]).optional();
+
+export const analyticsFilterQuerySchema = z.object({
+  dateFrom: z.coerce.date().optional(),
+  dateTo: z.coerce.date().optional(),
+  tradingAccountId: z.string().optional(),
+  symbol: z.string().optional(),
+  side: tradeSideSchema.optional(),
+  strategyId: z.string().optional(),
+  setupId: z.string().optional(),
+  tagIds: tagIdsQueryValue.transform((v) => (v == null ? undefined : Array.isArray(v) ? v : [v])),
+});
+export type AnalyticsFilterQuery = z.infer<typeof analyticsFilterQuerySchema>;
+
+export const groupPerformanceSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  tradeCount: z.number(),
+  netPnl: z.number(),
+  winRate: z.number().nullable(),
+  averageTrade: z.number().nullable(),
+  profitFactor: z.number().nullable(),
+});
+export type GroupPerformance = z.infer<typeof groupPerformanceSchema>;
+
+export const periodSummarySchema = z.object({
+  period: z.string(),
+  netPnl: z.number(),
+  tradeCount: z.number(),
+});
+export type PeriodSummary = z.infer<typeof periodSummarySchema>;
+
+export const winLossDistributionSchema = z.object({
+  winners: z.object({ count: z.number(), totalPnl: z.number() }),
+  losers: z.object({ count: z.number(), totalPnl: z.number() }),
+  breakEven: z.object({ count: z.number() }),
+});
+export type WinLossDistribution = z.infer<typeof winLossDistributionSchema>;
+
+export const analyticsBreakdownsSchema = z.object({
+  bySymbol: z.array(groupPerformanceSchema),
+  byStrategy: z.array(groupPerformanceSchema),
+  bySetup: z.array(groupPerformanceSchema),
+  bySide: z.array(groupPerformanceSchema),
+  byHour: z.array(groupPerformanceSchema),
+  byDayOfWeek: z.array(groupPerformanceSchema),
+  weekly: z.array(periodSummarySchema),
+  monthly: z.array(periodSummarySchema),
+  winLossDistribution: winLossDistributionSchema,
+});
+export type AnalyticsBreakdowns = z.infer<typeof analyticsBreakdownsSchema>;

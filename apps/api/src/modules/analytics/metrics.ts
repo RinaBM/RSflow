@@ -8,14 +8,18 @@ export interface AnalyticsTrade {
   entryTime: Date;
   exitTime: Date | null;
   netPnl: number | null;
+  strategyId: string | null;
+  strategyName: string | null;
+  setupId: string | null;
+  setupName: string | null;
 }
 
-interface ClosedTrade extends AnalyticsTrade {
+export interface ClosedTrade extends AnalyticsTrade {
   exitTime: Date;
   netPnl: number;
 }
 
-function isClosed(trade: AnalyticsTrade): trade is ClosedTrade {
+export function isClosed(trade: AnalyticsTrade): trade is ClosedTrade {
   return trade.status === "CLOSED" && trade.exitTime != null && trade.netPnl != null;
 }
 

@@ -1,10 +1,15 @@
 import type { Request, Response } from "express";
-import type { CalendarQuery } from "@rs-flow/shared";
-import { getCalendarSummary, getDashboardMetrics } from "./analytics.service.js";
+import type { AnalyticsFilterQuery, CalendarQuery } from "@rs-flow/shared";
+import { getAnalyticsBreakdowns, getCalendarSummary, getDashboardMetrics } from "./analytics.service.js";
 
 export async function dashboard(req: Request, res: Response) {
-  const metrics = await getDashboardMetrics(req.userId as string);
+  const metrics = await getDashboardMetrics(req.userId as string, req.query as unknown as AnalyticsFilterQuery);
   res.status(200).json(metrics);
+}
+
+export async function breakdowns(req: Request, res: Response) {
+  const result = await getAnalyticsBreakdowns(req.userId as string, req.query as unknown as AnalyticsFilterQuery);
+  res.status(200).json(result);
 }
 
 export async function calendar(req: Request, res: Response) {

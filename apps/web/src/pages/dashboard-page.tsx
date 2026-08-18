@@ -1,7 +1,9 @@
 import { StatTile } from "@/components/ui/stat-tile";
 import { ApiError } from "@/lib/api-client";
+import { useAnalyticsFilterValues } from "@/store/analytics-filters-store";
 import { useDashboardMetrics } from "@/features/analytics/hooks";
 import { EquityCurveChart } from "@/features/analytics/equity-curve-chart";
+import { AnalyticsFilterBar } from "@/features/analytics/analytics-filter-bar";
 
 function formatCurrency(value: number | null) {
   if (value == null) return "—";
@@ -39,7 +41,8 @@ function formatTradeRef(value: { symbol: string; netPnl: number } | null) {
 }
 
 export function DashboardPage() {
-  const { data: metrics, isLoading, isError, error } = useDashboardMetrics();
+  const filters = useAnalyticsFilterValues();
+  const { data: metrics, isLoading, isError, error } = useDashboardMetrics(filters);
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,6 +50,8 @@ export function DashboardPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">A quick snapshot of your trading performance.</p>
       </div>
+
+      <AnalyticsFilterBar />
 
       {isLoading ? (
         <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">

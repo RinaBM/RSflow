@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NotebookPen, Quote } from "lucide-react";
+import { NotebookPen, Quote, Shuffle } from "lucide-react";
 import type { Trade } from "@rs-flow/shared";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { TRADING_QUOTES } from "@/lib/trading-quotes";
+import { FUN_COLOR_BORDER_CLASSES, pickFunColor } from "@/lib/fun-colors";
 import { useTrades, useUpdateTrade } from "@/features/trades/hooks";
 
 function TradeNoteCard({ trade }: { trade: Trade }) {
@@ -64,6 +65,47 @@ function TradeNoteCard({ trade }: { trade: Trade }) {
   );
 }
 
+function randomQuoteIndex(exclude?: number) {
+  if (TRADING_QUOTES.length <= 1) return 0;
+  let index = Math.floor(Math.random() * TRADING_QUOTES.length);
+  while (index === exclude) index = Math.floor(Math.random() * TRADING_QUOTES.length);
+  return index;
+}
+
+function BigQuoteCard() {
+  const { t } = useTranslation();
+  const [index, setIndex] = useState(() => randomQuoteIndex());
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- pickFunColor() is intentionally random; index is just the recompute trigger
+  const funColor = useMemo(() => pickFunColor(), [index]);
+  const quote = TRADING_QUOTES[index]!;
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border-2 bg-card p-6 sm:flex-row sm:items-center sm:justify-between",
+        FUN_COLOR_BORDER_CLASSES[funColor],
+      )}
+    >
+      <div dir="ltr" className="min-w-0 text-start">
+        <p className="text-lg font-semibold italic leading-snug text-foreground sm:text-xl">
+          &ldquo;{quote.text}&rdquo;
+        </p>
+        <p className="mt-2 text-sm font-medium text-muted-foreground">— {quote.author}</p>
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="shrink-0 self-start sm:self-center"
+        onClick={() => setIndex((current) => randomQuoteIndex(current))}
+      >
+        <Shuffle className="h-3.5 w-3.5" />
+        {t("growth.nextQuote")}
+      </Button>
+    </div>
+  );
+}
+
 export function GrowthPage() {
   const { t } = useTranslation();
   const { data } = useTrades({ page: 1, pageSize: 10, sort: "entryTime", order: "desc" });
@@ -74,21 +116,6 @@ export function GrowthPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{t("growth.title")}</h1>
         <p className="text-sm text-muted-foreground">{t("growth.subtitle")}</p>
-      </div>
-
-      <div>
-        <h2 className="mb-2 flex items-center gap-1.5 px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
-          <Quote className="h-3 w-3" />
-          {t("growth.quotesHeading")}
-        </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {TRADING_QUOTES.map((quote) => (
-            <div key={quote.text} dir="ltr" className="rounded-lg border border-border bg-card p-4 text-start">
-              <p className="text-sm italic text-foreground">&ldquo;{quote.text}&rdquo;</p>
-              <p className="mt-2 text-xs font-medium text-muted-foreground">— {quote.author}</p>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div>
@@ -105,6 +132,14 @@ export function GrowthPage() {
             ))}
           </div>
         )}
+      </div>
+
+      <div>
+        <h2 className="mb-2 flex items-center gap-1.5 px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+          <Quote className="h-3 w-3" />
+          {t("growth.quotesHeading")}
+        </h2>
+        <BigQuoteCard />
       </div>
     </div>
   );

@@ -5,8 +5,10 @@ import { StatTile } from "@/components/ui/stat-tile";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ApiError } from "@/lib/api-client";
 import { formatCurrency, formatHoldingTime, formatPercent } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { getTimeOfDay, firstName } from "@/lib/greeting";
 import { pickMotivation } from "@/lib/motivation";
+import { FUN_COLOR_BADGE_CLASSES, pickFunColor } from "@/lib/fun-colors";
 import { useMe } from "@/features/auth/hooks";
 import { useAnalyticsFilterValues } from "@/store/analytics-filters-store";
 import { useDashboardMetrics } from "@/features/analytics/hooks";
@@ -37,26 +39,28 @@ function GreetingBanner({ hasTrades, netPnl }: { hasTrades: boolean; netPnl: num
   const { data: me } = useMe();
   const timeOfDay = useMemo(() => getTimeOfDay(), []);
   const tone = netPnl != null && netPnl >= 0 ? "positive" : "negative";
-  const pool = t(`dashboard.motivation.${tone}`, { returnObjects: true }) as string[];
+  const genderKey = me?.user?.gender === "MALE" ? "male" : me?.user?.gender === "FEMALE" ? "female" : "neutral";
+  const pool = t(`dashboard.motivation.${tone}.${genderKey}`, { returnObjects: true }) as string[];
   const name = me?.user ? firstName(me.user.name) : "";
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally re-picks only when the tone (win/loss) flips, not on every render
-  const message = useMemo(() => (hasTrades && name ? pickMotivation(pool, name) : ""), [tone, hasTrades, name]);
+  const greetingText = t(`dashboard.greeting.${timeOfDay}`);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- pickFunColor() is intentionally random; tone/genderKey are just the recompute trigger
+  const funColor = useMemo(() => pickFunColor(), [tone, genderKey]);
+  // Shows either the time-of-day greeting OR a motivational quip -- picked once per tone/gender
+  // change, never both stacked together.
+  const bigMessage = useMemo(() => {
+    if (hasTrades && Math.random() < 0.5) return pickMotivation(pool, name);
+    return `${greetingText}, ${name}!`;
+  }, [hasTrades, name, pool, greetingText]);
 
   if (!me?.user) return null;
-  const greeting = t(`dashboard.greeting.${timeOfDay}`);
   const Icon = TIME_ICONS[timeOfDay];
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-        <Icon className="h-4 w-4" />
+    <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-5 py-5">
+      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-full", FUN_COLOR_BADGE_CLASSES[funColor])}>
+        <Icon className="h-6 w-6" />
       </span>
-      <div className="min-w-0">
-        <div className="text-sm font-semibold text-foreground">
-          {greeting}, {name}!
-        </div>
-        {message ? <div className="text-sm text-muted-foreground">{message}</div> : null}
-      </div>
+      <div className="min-w-0 text-xl font-bold leading-snug text-foreground sm:text-2xl">{bigMessage}</div>
     </div>
   );
 }

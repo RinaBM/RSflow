@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, Link } from "react-router-dom";
+import type { Gender } from "@rs-flow/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { useMe, useRegister } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api-client";
 
@@ -13,6 +15,7 @@ export function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [gender, setGender] = useState<Gender | "">("");
 
   if (!meLoading && data?.user) {
     return <Navigate to="/" replace />;
@@ -20,7 +23,8 @@ export function RegisterPage() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    register.mutate({ name, email, password });
+    if (!gender) return;
+    register.mutate({ name, email, password, gender });
   }
 
   return (
@@ -58,13 +62,40 @@ export function RegisterPage() {
               />
             </div>
 
+            <div className="flex flex-col gap-1.5">
+              <Label>Gender</Label>
+              <p className="text-xs text-muted-foreground">So we can address you correctly around the app.</p>
+              <div className="flex overflow-hidden rounded-md border border-input">
+                <button
+                  type="button"
+                  onClick={() => setGender("FEMALE")}
+                  className={cn(
+                    "flex-1 px-4 py-1.5 text-sm font-medium transition-colors",
+                    gender === "FEMALE" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  Female
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGender("MALE")}
+                  className={cn(
+                    "flex-1 border-s border-input px-4 py-1.5 text-sm font-medium transition-colors",
+                    gender === "MALE" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  Male
+                </button>
+              </div>
+            </div>
+
             {register.isError ? (
               <p className="text-sm text-destructive">
                 {register.error instanceof ApiError ? register.error.message : "Registration failed"}
               </p>
             ) : null}
 
-            <Button type="submit" disabled={register.isPending}>
+            <Button type="submit" disabled={register.isPending || !gender}>
               {register.isPending ? "Creating account…" : "Create account"}
             </Button>
           </form>

@@ -34,6 +34,13 @@
   /* Neutral signal for non-P&L status (e.g. open positions) — kept off the green/red axis */
   --status-open: #c8933a;
   --status-open-foreground: oklch(0.16 0 0);
+
+  /* Playful accent set for non-data "fun corner" surfaces (greeting banner, quotes) — never used for P&L or status */
+  --fun-1: #f59e0b;
+  --fun-2: #ec4899;
+  --fun-3: #a78bfa;
+  --fun-4: #2dd4bf;
+  --fun-5: #a3e635;
 }
 
 .dark {
@@ -64,6 +71,12 @@
   --loss-foreground: oklch(0.98 0 0);
   --status-open: #d9a441;
   --status-open-foreground: oklch(0.16 0.02 80);
+
+  --fun-1: #f5b042;
+  --fun-2: #f472b6;
+  --fun-3: #b39dfb;
+  --fun-4: #45e0cb;
+  --fun-5: #bbec4c;
 }
 
 @theme inline {
@@ -93,6 +106,11 @@
   --color-loss-foreground: var(--loss-foreground);
   --color-status-open: var(--status-open);
   --color-status-open-foreground: var(--status-open-foreground);
+  --color-fun-1: var(--fun-1);
+  --color-fun-2: var(--fun-2);
+  --color-fun-3: var(--fun-3);
+  --color-fun-4: var(--fun-4);
+  --color-fun-5: var(--fun-5);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

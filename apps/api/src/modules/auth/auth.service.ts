@@ -14,10 +14,10 @@ export async function registerUser(input: RegisterInput) {
 
   const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
   const user = await prisma.user.create({
-    data: { email: input.email, passwordHash, name: input.name },
+    data: { email: input.email, passwordHash, name: input.name, gender: input.gender },
   });
 
-  return issueTokensForUser(user.id, user.email, user.name);
+  return issueTokensForUser(user.id, user.email, user.name, user.gender);
 }
 
 export async function loginUser(input: LoginInput) {
@@ -31,7 +31,7 @@ export async function loginUser(input: LoginInput) {
     throw AppError.unauthorized("Invalid email or password");
   }
 
-  return issueTokensForUser(user.id, user.email, user.name);
+  return issueTokensForUser(user.id, user.email, user.name, user.gender);
 }
 
 export async function getUserById(id: string) {
@@ -39,7 +39,7 @@ export async function getUserById(id: string) {
   if (!user) {
     throw AppError.unauthorized("Session user no longer exists");
   }
-  return { id: user.id, email: user.email, name: user.name };
+  return { id: user.id, email: user.email, name: user.name, gender: user.gender };
 }
 
 export async function refreshSession(refreshToken: string) {
@@ -55,11 +55,11 @@ export async function refreshSession(refreshToken: string) {
     throw AppError.unauthorized("Invalid or expired refresh token");
   }
 
-  return issueTokensForUser(user.id, user.email, user.name);
+  return issueTokensForUser(user.id, user.email, user.name, user.gender);
 }
 
-function issueTokensForUser(id: string, email: string, name: string) {
+function issueTokensForUser(id: string, email: string, name: string, gender: "MALE" | "FEMALE" | null) {
   const accessToken = signAccessToken({ sub: id, email });
   const refreshToken = signRefreshToken({ sub: id, email });
-  return { accessToken, refreshToken, user: { id, email, name } };
+  return { accessToken, refreshToken, user: { id, email, name, gender } };
 }

@@ -96,8 +96,10 @@ export function AppLayout() {
 
       <aside
         className={cn(
-          "fixed inset-y-0 start-0 z-50 flex w-64 shrink-0 flex-col border-e border-border bg-card transition-transform duration-200 lg:static lg:w-60 lg:translate-x-0",
-          mobileNavOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full",
+          "fixed inset-y-0 start-0 z-50 flex w-64 shrink-0 flex-col border-e border-border bg-card transition-transform duration-200 lg:static lg:w-60",
+          // Scoped to max-lg so these transforms don't exist as rules at lg:+ at all --
+          // avoids relying on lg: overriding rtl: in the cascade, which isn't guaranteed.
+          mobileNavOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full max-lg:rtl:translate-x-full",
         )}
       >
         <div className="flex h-14 items-center justify-between gap-2 border-b border-border px-4">

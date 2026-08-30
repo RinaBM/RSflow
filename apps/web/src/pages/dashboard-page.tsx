@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { StatTile } from "@/components/ui/stat-tile";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ApiError } from "@/lib/api-client";
-import { formatCurrency, formatHoldingTime, formatPercent } from "@/lib/format";
+import { formatCurrency, formatHoldingTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { getTimeOfDay, firstName } from "@/lib/greeting";
 import { pickMotivation } from "@/lib/motivation";
@@ -12,7 +12,7 @@ import { FUN_COLOR_BADGE_CLASSES, pickFunColor } from "@/lib/fun-colors";
 import { useMe } from "@/features/auth/hooks";
 import { useAnalyticsFilterValues } from "@/store/analytics-filters-store";
 import { useDashboardMetrics } from "@/features/analytics/hooks";
-import { EquityCurveChart } from "@/features/analytics/equity-curve-chart";
+import { DashboardHero } from "@/features/analytics/dashboard-hero";
 import { AnalyticsFilterBar } from "@/features/analytics/analytics-filter-bar";
 import { RecentTradesCard } from "@/features/trades/recent-trades-card";
 
@@ -93,23 +93,7 @@ export function DashboardPage() {
         <EmptyState icon={LineChart} title={t("dashboard.emptyTitle")} description={t("dashboard.emptyDescription")} />
       ) : metrics ? (
         <>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatTile
-              size="hero"
-              label={t("dashboard.stats.netPnl")}
-              value={formatCurrency(metrics.netPnl)}
-              tone="auto"
-              numericValue={metrics.netPnl}
-            />
-            <StatTile size="hero" label={t("dashboard.stats.winRate")} value={formatPercent(metrics.winRate)} />
-            <StatTile size="hero" label={t("dashboard.stats.profitFactor")} value={formatRatio(metrics.profitFactor)} />
-            <StatTile
-              size="hero"
-              label={t("dashboard.stats.totalTrades")}
-              value={String(metrics.totalTrades)}
-              sublabel={t("dashboard.stats.openSuffix", { count: metrics.openTrades })}
-            />
-          </div>
+          <DashboardHero metrics={metrics} />
 
           <RecentTradesCard />
 
@@ -142,13 +126,6 @@ export function DashboardPage() {
               <StatTile label={t("dashboard.stats.maxConsecutiveWins")} value={String(metrics.maxConsecutiveWins)} tone="profit" />
               <StatTile label={t("dashboard.stats.maxConsecutiveLosses")} value={String(metrics.maxConsecutiveLosses)} tone="loss" />
             </div>
-          </div>
-
-          <div>
-            <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
-              {t("dashboard.equityCurve")}
-            </h2>
-            <EquityCurveChart data={metrics.equityCurve} />
           </div>
         </>
       ) : null}

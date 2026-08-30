@@ -45,7 +45,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
   return cn(
     "flex items-center gap-3 rounded-md border-s-2 px-3 py-2 text-sm transition-colors",
     isActive
-      ? "border-primary bg-accent font-bold text-foreground"
+      ? "border-primary bg-gradient-to-r from-primary/15 to-violet/5 font-bold text-foreground shadow-[inset_2px_0_0_0_var(--primary),0_0_22px_-8px_rgba(34,211,238,0.5)] rtl:shadow-[inset_-2px_0_0_0_var(--primary),0_0_22px_-8px_rgba(34,211,238,0.5)]"
       : "border-transparent font-medium text-muted-foreground hover:bg-accent/60 hover:text-foreground",
   );
 }
@@ -78,10 +78,12 @@ export function AppLayout() {
           <Menu className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-xs font-bold text-primary-foreground">
-            R
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-primary to-violet shadow-[0_0_14px_-2px_rgba(34,211,238,0.6)]">
+            <span className="h-2 w-2 rounded-[2px] bg-background" />
           </span>
-          <span className="text-sm font-semibold tracking-wide">RS FLOW</span>
+          <span className="bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-sm font-bold tracking-wide text-transparent">
+            RS FLOW
+          </span>
         </div>
         <LanguageToggle />
       </div>
@@ -104,10 +106,12 @@ export function AppLayout() {
       >
         <div className="flex h-14 items-center justify-between gap-2 border-b border-border px-4">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-xs font-bold text-primary-foreground">
-              R
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-primary to-violet shadow-[0_0_14px_-2px_rgba(34,211,238,0.6)]">
+              <span className="h-2 w-2 rounded-[2px] bg-background" />
             </span>
-            <span className="text-sm font-semibold tracking-wide">RS FLOW</span>
+            <span className="bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-sm font-bold tracking-wide text-transparent">
+              RS FLOW
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <LanguageToggle />
@@ -157,7 +161,7 @@ export function AppLayout() {
 
         {data?.user ? (
           <div className="flex items-center gap-2.5 border-t border-border px-4 py-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-semibold text-secondary-foreground">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet to-primary text-[11px] font-bold text-background">
               {initials(data.user.name)}
             </span>
             <div className="min-w-0">

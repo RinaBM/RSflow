@@ -28,7 +28,8 @@ export function AnalyticsFilterBar() {
     filters.tagIds.length > 0;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
+    <div className="relative flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-card p-4">
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
           <label className="text-xs text-muted-foreground">{t("filters.from")}</label>
@@ -131,9 +132,9 @@ export function AnalyticsFilterBar() {
               type="button"
               onClick={() => filters.toggleTag(tag.id)}
               className={cn(
-                "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors",
+                "rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors",
                 filters.tagIds.includes(tag.id)
-                  ? "border-primary bg-primary text-primary-foreground"
+                  ? "border-violet/55 bg-violet/15 text-violet shadow-[0_0_14px_-4px_rgba(167,139,250,0.6)]"
                   : "border-border bg-background text-muted-foreground hover:text-foreground",
               )}
             >

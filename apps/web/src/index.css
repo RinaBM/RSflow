@@ -41,6 +41,10 @@
   --fun-3: #a78bfa;
   --fun-4: #2dd4bf;
   --fun-5: #a3e635;
+
+  /* Secondary brand accent (paired with --primary for gradients/dual-accent moments) */
+  --violet: #7c5cd6;
+  --violet-foreground: oklch(0.98 0 0);
 }
 
 .dark {
@@ -51,8 +55,8 @@
   --surface-2: oklch(0.24 0.014 262);
   --popover: oklch(0.195 0.013 262);
   --popover-foreground: oklch(0.94 0.004 262);
-  --primary: oklch(0.78 0.13 200);
-  --primary-foreground: oklch(0.16 0.02 200);
+  --primary: #22d3ee;
+  --primary-foreground: oklch(0.16 0.03 220);
   --secondary: oklch(0.26 0.012 262);
   --secondary-foreground: oklch(0.94 0.004 262);
   --muted: oklch(0.23 0.012 262);
@@ -63,13 +67,13 @@
   --destructive-foreground: oklch(0.96 0 0);
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 13%);
-  --ring: oklch(0.78 0.13 200);
+  --ring: #22d3ee;
 
-  --profit: #0ca30c;
-  --profit-foreground: oklch(0.98 0 0);
-  --loss: #d03b3b;
+  --profit: #14e28f;
+  --profit-foreground: oklch(0.16 0.03 160);
+  --loss: #ff3d71;
   --loss-foreground: oklch(0.98 0 0);
-  --status-open: #d9a441;
+  --status-open: #ffb020;
   --status-open-foreground: oklch(0.16 0.02 80);
 
   --fun-1: #f5b042;
@@ -77,6 +81,9 @@
   --fun-3: #b39dfb;
   --fun-4: #45e0cb;
   --fun-5: #bbec4c;
+
+  --violet: #a78bfa;
+  --violet-foreground: oklch(0.16 0.03 290);
 }
 
 @theme inline {
@@ -111,6 +118,8 @@
   --color-fun-3: var(--fun-3);
   --color-fun-4: var(--fun-4);
   --color-fun-5: var(--fun-5);
+  --color-violet: var(--violet);
+  --color-violet-foreground: var(--violet-foreground);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -141,4 +150,43 @@
 
 .value-pop {
   animation: value-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Controlled glow accents — reserved for the handful of elements that should
+   pull the eye first (hero panel, active nav, primary CTAs). Never applied
+   uniformly, or the "premium terminal" feel collapses into neon noise. */
+@layer utilities {
+  .glow-primary {
+    box-shadow: 0 0 22px -6px rgba(34, 211, 238, 0.55);
+  }
+  .glow-violet {
+    box-shadow: 0 0 22px -6px rgba(167, 139, 250, 0.5);
+  }
+  .glow-profit {
+    box-shadow: 0 0 16px -4px rgba(20, 226, 143, 0.55);
+  }
+  .glow-loss {
+    box-shadow: 0 0 16px -4px rgba(255, 61, 113, 0.5);
+  }
+  .text-glow-primary {
+    text-shadow: 0 0 14px rgba(34, 211, 238, 0.5);
+  }
+  .gradient-border {
+    position: relative;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.55), rgba(167, 139, 250, 0.35), rgba(34, 211, 238, 0.1));
+    padding: 1.5px;
+  }
+  .gradient-text-profit {
+    background: linear-gradient(90deg, var(--profit), var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gradient-text-loss {
+    background: linear-gradient(90deg, var(--loss), #ff8a5c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
